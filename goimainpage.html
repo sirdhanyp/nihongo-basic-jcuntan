@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a1a">
+<title>日本語クイズ - Tebak Kosakata Jepang</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  
+  body {
+    font-family: -apple-system, 'Segoe UI', 'Hiragino Sans', sans-serif;
+    background: #0a0a1a;
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  #bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    display: block;
+  }
+  
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 16px 16px 32px;
+  }
+  
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.35s ease; }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* ===== MENU SCREEN ===== */
+  .menu-container { padding-top: 20px; }
+  
+  .title-area { text-align: center; margin-bottom: 24px; }
+  
+  .flag {
+    font-size: 48px;
+    margin-bottom: 8px;
+    animation: floatFlag 3s ease-in-out infinite;
+    display: inline-block;
+  }
+  @keyframes floatFlag {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  
+  .title-area h1 {
+    font-size: 34px;
+    background: linear-gradient(135deg, #ff6b9d, #ff4757, #ffa502);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-shadow: 0 0 30px rgba(255, 71, 87, 0.3);
+  }
+  
+  .subtitle {
+    color: #a0a0c0;
+    font-size: 13px;
+    margin-top: 6px;
+  }
+  
+  .card {
+    background: rgba(20, 20, 45, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 22px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+  
+  .card label {
+    display: block;
+    font-size: 13px;
+    color: #c0c0e0;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  
+  #player-name {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  #player-name:focus {
+    border-color: #ff4757;
+    background: rgba(255, 71, 87, 0.08);
+    box-shadow: 0 0 0 4px rgba(255, 71, 87, 0.15);
+  }
+  #player-name::placeholder { color: #60608080; }
+  
+  .btn {
+    width: 100%;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: all 0.2s;
+    font-family: inherit;
+    letter-spacing: 0.3px;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #ff4757, #ff6b9d);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+  }
+  .btn-primary:active { transform: scale(0.97); box-shadow: 0 3px 10px rgba(255, 71, 87, 0.4); }
+  
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .btn-secondary:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.15); }
+  
+  .rules {
+    margin-top: 20px;
+    background: rgba(20, 20, 45, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 18px;
+    backdrop-filter: blur(10px);
+  }
+  .rules h3 {
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: #ffa502;
+  }
+  .rules ul { list-style: none; }
+  .rules li {
+    font-size: 13px;
+    color: #b0b0d0;
+    padding: 5px 0 5px 20px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .rules li::before {
+    content: '◆';
+    position: absolute;
+    left: 0;
+    color: #ff4757;
+    font-size: 10px;
+    top: 8px;
+  }
+  
+  /* ===== GAME SCREEN ===== */
+  .hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(20, 20, 45, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    backdrop-filter: blur(20px);
+    margin-bottom: 8px;
+  }
+  .hud-lives { font-size: 20px; letter-spacing: 2px; }
+  .hud-progress {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffa502;
+    background: rgba(255, 165, 2, 0.12);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  
+  .streak-bar {
+    font-size: 12px;
+    color: #ffa502;
+    text-align: right;
+    padding: 0 6px 10px;
+    opacity: 0.85;
+  }
+  .streak-bar b { color: #ff6b9d; font-size: 14px; }
+  
+  .question-card {
+    background: linear-gradient(160deg, rgba(255, 71, 87, 0.15), rgba(255, 107, 157, 0.1));
+    border: 1px solid rgba(255, 71, 87, 0.3);
+    border-radius: 20px;
+    padding: 24px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(255, 71, 87, 0.15);
+    animation: cardIn 0.4s ease;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
+  .question-label {
+    font-size: 11px;
+    color: #a0a0c0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  
+  .question-jp {
+    font-size: 56px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.1;
+    text-shadow: 0 0 30px rgba(255, 71, 87, 0.4);
+  }
+  
+  .question-romaji {
+    font-size: 16px;
+    color: #ff6b9d;
+    margin-top: 10px;
+    font-style: italic;
+    letter-spacing: 1px;
+  }
+  
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .option-btn {
+    background: rgba(20, 20, 45, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+    padding: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .option-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.15), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .option-btn:active:not(:disabled)::before { opacity: 1; }
+  
+  .option-btn:active:not(:disabled) {
+    transform: scale(0.95);
+    border-color: rgba(255, 71, 87, 0.5);
+  }
+  
+  .option-btn.correct {
+    background: rgba(34, 197, 94, 0.25);
+    border-color: #22c55e;
+    animation: correctPulse 0.5s ease;
+    box-shadow: 0 0 24px rgba(34, 197, 94, 0.5);
+  }
+  
+  .option-btn.wrong {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    animation: wrongShake 0.5s ease;
+    box-shadow: 0 0 24px rgba(239, 68, 68, 0.5);
+  }
+  
+  @keyframes correctPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  @keyframes wrongShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+  
+  .option-emoji {
+    font-size: 60px;
+    line-height: 1;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+    pointer-events: none;
+    user-select: none;
+  }
+  
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120px);
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1a1a2e;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 800;
+    font-size: 14px;
+    box-shadow: 0 8px 30px rgba(251, 191, 36, 0.5);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 100;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  
+  /* ===== END SCREEN ===== */
+  .end-header {
+    text-align: center;
+    padding: 24px 16px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    animation: cardIn 0.5s ease;
+  }
+  .end-header.win {
+    background: linear-gradient(160deg, rgba(34, 197, 94, 0.25), rgba(16, 185, 129, 0.1));
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    box-shadow: 0 8px 32px rgba(34, 197, 94, 0.2);
+  }
+  .end-header.lose {
+    background: linear-gradient(160deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.1));
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    box-shadow: 0 8px 32px rgba(239, 68, 68, 0.2);
+  }
+  .end-emoji { font-size: 64px; margin-bottom: 8px; }
+  .end-title {
+    font-size: 26px;
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+  .end-header.win .end-title { color: #22c55e; }
+  .end-header.lose .end-title { color: #ef4444; }
+  .end-name { font-size: 14px; color: #c0c0e0; }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    background: rgba(20, 20, 45, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 14px 8px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+  .stat-value {
+    font-size: 22px;
+    font-weight: 900;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: #a0a0c0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .stat-box.correct .stat-value { color: #22c55e; }
+  .stat-box.wrong .stat-value { color: #ef4444; }
+  .stat-box.score .stat-value { color: #ffa502; }
+  
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 20px 0 12px;
+    color: #ffa502;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  
+  .review-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+  .review-emoji {
+    font-size: 36px;
+    flex-shrink: 0;
+  }
+  .review-info { flex: 1; min-width: 0; }
+  .review-kanji {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .review-romaji {
+    font-size: 12px;
+    color: #ff6b9d;
+    font-style: italic;
+    margin: 2px 0;
+  }
+  .review-meaning {
+    font-size: 12px;
+    color: #a0a0c0;
+  }
+  
+  .no-wrong {
+    text-align: center;
+    padding: 20px;
+    color: #22c55e;
+    font-weight: 600;
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 14px;
+  }
+  
+  /* ===== HALL OF FAME ===== */
+  .hof-header {
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .hof-header h1 {
+    font-size: 30px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+  }
+  .hof-header p {
+    color: #a0a0c0;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  
+  .hof-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .hof-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(20, 20, 45, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 12px 14px;
+    backdrop-filter: blur(10px);
+  }
+  .hof-item.rank-1 {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.08));
+    border-color: rgba(251, 191, 36, 0.5);
+    box-shadow: 0 4px 20px rgba(251, 191, 36, 0.2);
+  }
+  .hof-item.rank-2 {
+    background: linear-gradient(135deg, rgba(192, 192, 220, 0.15), rgba(160, 160, 200, 0.05));
+    border-color: rgba(192, 192, 220, 0.4);
+  }
+  .hof-item.rank-3 {
+    background: linear-gradient(135deg, rgba(205, 127, 50, 0.15), rgba(180, 100, 40, 0.05));
+    border-color: rgba(205, 127, 50, 0.4);
+  }
+  
+  .hof-rank {
+    font-size: 16px;
+    font-weight: 900;
+    width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+    color: #a0a0c0;
+  }
+  .hof-item.rank-1 .hof-rank { color: #fbbf24; }
+  .hof-item.rank-2 .hof-rank { color: #d0d0e0; }
+  .hof-item.rank-3 .hof-rank { color: #cd7f32; }
+  
+  .hof-info { flex: 1; min-width: 0; }
+  .hof-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hof-meta {
+    font-size: 11px;
+    color: #a0a0c0;
+    margin-top: 2px;
+  }
+  .hof-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .hof-badge.win {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+  }
+  .hof-badge.lose {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+  }
+  
+  .empty-hof {
+    text-align: center;
+    padding: 40px 20px;
+    color: #606080;
+  }
+  .empty-hof .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-hof p { font-size: 14px; }
+  
+  .back-btn-wrap { margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<div id="app">
+
+  <!-- ============ MENU SCREEN ============ -->
+  <section id="screen-menu" class="screen active">
+    <div class="menu-container">
+      <div class="title-area">
+        <div class="flag">🇯🇵</div>
+        <h1>日本語クイズ</h1>
+        <p class="subtitle">Tebak Kosakata Benda Bahasa Jepang</p>
+      </div>
+      
+      <div class="card">
+        <label for="player-name">👤 Nama Pemain</label>
+        <input type="text" id="player-name" maxlength="20" placeholder="Masukkan nama kamu..." autocomplete="off">
+        <button class="btn btn-primary" id="btn-start">▶ Mulai Permainan</button>
+        <button class="btn btn-secondary" id="btn-hof">🏆 Hall of Fame</button>
+      </div>
+      
+      <div class="rules">
+        <h3>📖 Cara Bermain</h3>
+        <ul>
+          <li>Jawab <b>20 kosakata</b> dengan benar untuk menang</li>
+          <li>Kamu mulai dengan <b>3 nyawa</b> ❤️❤️❤️</li>
+          <li>Jawaban salah = <b>-1 nyawa</b></li>
+          <li><b>10 benar berturut-turut</b> = +1 nyawa (maks 3)</li>
+          <li>Nyawa habis = <b>Game Over</b></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GAME SCREEN ============ -->
+  <section id="screen-game" class="screen">
+    <div class="hud">
+      <div class="hud-lives" id="hud-lives">❤️❤️❤️</div>
+      <div class="hud-progress" id="hud-correct">0/20</div>
+    </div>
+    <div class="streak-bar">🔥 Streak: <b id="hud-streak">0</b> / 10</div>
+    
+    <div class="question-card">
+      <div class="question-label">Kosakata ini adalah?</div>
+      <div class="question-jp" id="question-jp">犬</div>
+      <div class="question-romaji" id="question-romaji">inu</div>
+    </div>
+    
+    <div class="options-grid" id="options-grid"></div>
+  </section>
+
+  <!-- ============ END SCREEN ============ -->
+  <section id="screen-end" class="screen">
+    <div class="end-header" id="end-header">
+      <div class="end-emoji" id="end-emoji">🎉</div>
+      <div class="end-title" id="end-title">MENANG!</div>
+      <div class="end-name" id="end-name">Pemain</div>
+    </div>
+    
+    <div class="stats-grid">
+      <div class="stat-box correct">
+        <span class="stat-value" id="stat-correct">0</span>
+        <span class="stat-label">Benar</span>
+      </div>
+      <div class="stat-box wrong">
+        <span class="stat-value" id="stat-wrong">0</span>
+        <span class="stat-label">Salah</span>
+      </div>
+      <div class="stat-box score">
+        <span class="stat-value" id="stat-score">0</span>
+        <span class="stat-label">Skor</span>
+      </div>
+    </div>
+    
+    <div id="review-section">
+      <div class="section-title">📚 Materi Pembelajaran - Kosakata yang Salah</div>
+      <div class="review-list" id="review-list"></div>
+    </div>
+    
+    <div class="back-btn-wrap">
+      <button class="btn btn-primary" id="btn-play-again">🔄 Main Lagi</button>
+      <button class="btn btn-secondary" id="btn-back-menu">🏠 Menu Utama</button>
+    </div>
+  </section>
+
+  <!-- ============ HALL OF FAME SCREEN ============ -->
+  <section id="screen-hof" class="screen">
+    <div class="hof-header">
+      <h1>🏆 Hall of Fame</h1>
+      <p>Peringkat Pemain Terbaik</p>
+    </div>
+    
+    <div class="hof-list" id="hof-list"></div>
+    
+    <div class="back-btn-wrap">
+      <button class="btn btn-secondary" id="btn-hof-back">← Kembali ke Menu</button>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- WebGL Library: Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+/* ============================================================
+   DATABASE 100 KOSAKATA BENDA BAHASA JEPANG
+   ============================================================ */
+const VOCAB = [
+  { kanji: '犬', romaji: 'inu', meaning: 'Anjing', emoji: '🐕' },
+  { kanji: '猫', romaji: 'neko', meaning: 'Kucing', emoji: '🐈' },
+  { kanji: '鳥', romaji: 'tori', meaning: 'Burung', emoji: '🐦' },
+  { kanji: '魚', romaji: 'sakana', meaning: 'Ikan', emoji: '🐟' },
+  { kanji: '馬', romaji: 'uma', meaning: 'Kuda', emoji: '🐴' },
+  { kanji: '牛', romaji: 'ushi', meaning: 'Sapi', emoji: '🐄' },
+  { kanji: '豚', romaji: 'buta', meaning: 'Babi', emoji: '🐖' },
+  { kanji: '羊', romaji: 'hitsuji', meaning: 'Domba', emoji: '🐑' },
+  { kanji: '象', romaji: 'zou', meaning: 'Gajah', emoji: '🐘' },
+  { kanji: '虎', romaji: 'tora', meaning: 'Harimau', emoji: '🐅' },
+  { kanji: '熊', romaji: 'kuma', meaning: 'Beruang', emoji: '🐻' },
+  { kanji: '猿', romaji: 'saru', meaning: 'Monyet', emoji: '🐒' },
+  { kanji: '兎', romaji: 'usagi', meaning: 'Kelinci', emoji: '🐰' },
+  { kanji: '鼠', romaji: 'nezumi', meaning: 'Tikus', emoji: '🐭' },
+  { kanji: '鶏', romaji: 'niwatori', meaning: 'Ayam', emoji: '🐔' },
+  { kanji: '蛙', romaji: 'kaeru', meaning: 'Katak', emoji: '🐸' },
+  { kanji: '蛇', romaji: 'hebi', meaning: 'Ular', emoji: '🐍' },
+  { kanji: '亀', romaji: 'kame', meaning: 'Kura-kura', emoji: '🐢' },
+  { kanji: '蝶', romaji: 'chou', meaning: 'Kupu-kupu', emoji: '🦋' },
+  { kanji: '蜂', romaji: 'hachi', meaning: 'Lebah', emoji: '🐝' },
+  { kanji: '蟻', romaji: 'ari', meaning: 'Semut', emoji: '🐜' },
+  { kanji: '蜘蛛', romaji: 'kumo', meaning: 'Laba-laba', emoji: '🕷️' },
+  { kanji: '蟹', romaji: 'kani', meaning: 'Kepiting', emoji: '🦀' },
+  { kanji: '蛸', romaji: 'tako', meaning: 'Gurita', emoji: '🐙' },
+  { kanji: '鯨', romaji: 'kujira', meaning: 'Paus', emoji: '🐋' },
+  { kanji: '鮫', romaji: 'same', meaning: 'Hiu', emoji: '🦈' },
+  { kanji: '海', romaji: 'umi', meaning: 'Laut', emoji: '🌊' },
+  { kanji: '山', romaji: 'yama', meaning: 'Gunung', emoji: '⛰️' },
+  { kanji: '川', romaji: 'kawa', meaning: 'Sungai', emoji: '🏞️' },
+  { kanji: '木', romaji: 'ki', meaning: 'Pohon', emoji: '🌳' },
+  { kanji: '花', romaji: 'hana', meaning: 'Bunga', emoji: '🌸' },
+  { kanji: '草', romaji: 'kusa', meaning: 'Rumput', emoji: '🌿' },
+  { kanji: '太陽', romaji: 'taiyou', meaning: 'Matahari', emoji: '☀️' },
+  { kanji: '月', romaji: 'tsuki', meaning: 'Bulan', emoji: '🌙' },
+  { kanji: '星', romaji: 'hoshi', meaning: 'Bintang', emoji: '⭐' },
+  { kanji: '雲', romaji: 'kumo', meaning: 'Awan', emoji: '☁️' },
+  { kanji: '雨', romaji: 'ame', meaning: 'Hujan', emoji: '🌧️' },
+  { kanji: '雪', romaji: 'yuki', meaning: 'Salju', emoji: '❄️' },
+  { kanji: '雷', romaji: 'kaminari', meaning: 'Petir', emoji: '⚡' },
+  { kanji: '虹', romaji: 'niji', meaning: 'Pelangi', emoji: '🌈' },
+  { kanji: '火', romaji: 'hi', meaning: 'Api', emoji: '🔥' },
+  { kanji: '水', romaji: 'mizu', meaning: 'Air', emoji: '💧' },
+  { kanji: '家', romaji: 'ie', meaning: 'Rumah', emoji: '🏠' },
+  { kanji: '車', romaji: 'kuruma', meaning: 'Mobil', emoji: '🚗' },
+  { kanji: '自転車', romaji: 'jitensha', meaning: 'Sepeda', emoji: '🚲' },
+  { kanji: '電車', romaji: 'densha', meaning: 'Kereta', emoji: '🚆' },
+  { kanji: '飛行機', romaji: 'hikouki', meaning: 'Pesawat', emoji: '✈️' },
+  { kanji: '船', romaji: 'fune', meaning: 'Kapal', emoji: '🚢' },
+  { kanji: '電話', romaji: 'denwa', meaning: 'Telepon', emoji: '☎️' },
+  { kanji: '時計', romaji: 'tokei', meaning: 'Jam', emoji: '🕐' },
+  { kanji: '本', romaji: 'hon', meaning: 'Buku', emoji: '📖' },
+  { kanji: '鉛筆', romaji: 'enpitsu', meaning: 'Pensil', emoji: '✏️' },
+  { kanji: '鞄', romaji: 'kaban', meaning: 'Tas', emoji: '🎒' },
+  { kanji: '鍵', romaji: 'kagi', meaning: 'Kunci', emoji: '🔑' },
+  { kanji: '傘', romaji: 'kasa', meaning: 'Payung', emoji: '☂️' },
+  { kanji: '眼鏡', romaji: 'megane', meaning: 'Kacamata', emoji: '👓' },
+  { kanji: '靴', romaji: 'kutsu', meaning: 'Sepatu', emoji: '👟' },
+  { kanji: '帽子', romaji: 'boushi', meaning: 'Topi', emoji: '👒' },
+  { kanji: '服', romaji: 'fuku', meaning: 'Pakaian', emoji: '👕' },
+  { kanji: '財布', romaji: 'saifu', meaning: 'Dompet', emoji: '👛' },
+  { kanji: 'カメラ', romaji: 'kamera', meaning: 'Kamera', emoji: '📷' },
+  { kanji: 'テレビ', romaji: 'terebi', meaning: 'Televisi', emoji: '📺' },
+  { kanji: 'パソコン', romaji: 'pasokon', meaning: 'Komputer', emoji: '💻' },
+  { kanji: '椅子', romaji: 'isu', meaning: 'Kursi', emoji: '🪑' },
+  { kanji: '机', romaji: 'tsukue', meaning: 'Meja', emoji: '🗄️' },
+  { kanji: 'ベッド', romaji: 'beddo', meaning: 'Tempat Tidur', emoji: '🛏️' },
+  { kanji: 'ドア', romaji: 'doa', meaning: 'Pintu', emoji: '🚪' },
+  { kanji: '窓', romaji: 'mado', meaning: 'Jendela', emoji: '🪟' },
+  { kanji: '皿', romaji: 'sara', meaning: 'Piring', emoji: '🍽️' },
+  { kanji: 'コップ', romaji: 'koppu', meaning: 'Gelas', emoji: '🥤' },
+  { kanji: '箸', romaji: 'hashi', meaning: 'Sumpit', emoji: '🥢' },
+  { kanji: 'スプーン', romaji: 'supuun', meaning: 'Sendok', emoji: '🥄' },
+  { kanji: 'フォーク', romaji: 'fooku', meaning: 'Garpu', emoji: '🍴' },
+  { kanji: 'ナイフ', romaji: 'naifu', meaning: 'Pisau', emoji: '🔪' },
+  { kanji: 'パン', romaji: 'pan', meaning: 'Roti', emoji: '🍞' },
+  { kanji: '米', romaji: 'kome', meaning: 'Beras/Nasi', emoji: '🍚' },
+  { kanji: '卵', romaji: 'tamago', meaning: 'Telur', emoji: '🥚' },
+  { kanji: '肉', romaji: 'niku', meaning: 'Daging', emoji: '🍖' },
+  { kanji: '野菜', romaji: 'yasai', meaning: 'Sayuran', emoji: '🥬' },
+  { kanji: '果物', romaji: 'kudamono', meaning: 'Buah', emoji: '🍎' },
+  { kanji: 'りんご', romaji: 'ringo', meaning: 'Apel', emoji: '🍏' },
+  { kanji: 'バナナ', romaji: 'banana', meaning: 'Pisang', emoji: '🍌' },
+  { kanji: '葡萄', romaji: 'budou', meaning: 'Anggur', emoji: '🍇' },
+  { kanji: '桃', romaji: 'momo', meaning: 'Persik', emoji: '🍑' },
+  { kanji: '苺', romaji: 'ichigo', meaning: 'Stroberi', emoji: '🍓' },
+  { kanji: '西瓜', romaji: 'suika', meaning: 'Semangka', emoji: '🍉' },
+  { kanji: '檸檬', romaji: 'remon', meaning: 'Lemon', emoji: '🍋' },
+  { kanji: 'トマト', romaji: 'tomato', meaning: 'Tomat', emoji: '🍅' },
+  { kanji: '人参', romaji: 'ninjin', meaning: 'Wortel', emoji: '🥕' },
+  { kanji: '玉葱', romaji: 'tamanegi', meaning: 'Bawang Bombay', emoji: '🧅' },
+  { kanji: '茄子', romaji: 'nasu', meaning: 'Terong', emoji: '🍆' },
+  { kanji: '茸', romaji: 'kinoko', meaning: 'Jamur', emoji: '🍄' },
+  { kanji: 'パンケーキ', romaji: 'pankeeeki', meaning: 'Pancake', emoji: '🥞' },
+  { kanji: 'ケーキ', romaji: 'keeki', meaning: 'Kue', emoji: '🍰' },
+  { kanji: '飴', romaji: 'ame', meaning: 'Permen', emoji: '🍬' },
+  { kanji: 'チョコレート', romaji: 'chokoreeto', meaning: 'Cokelat', emoji: '🍫' },
+  { kanji: '珈琲', romaji: 'koohii', meaning: 'Kopi', emoji: '☕' },
+  { kanji: '茶', romaji: 'cha', meaning: 'Teh', emoji: '🍵' },
+  { kanji: '酒', romaji: 'sake', meaning: 'Minuman Sake', emoji: '🍶' },
+  { kanji: '牛乳', romaji: 'gyuunyuu', meaning: 'Susu', emoji: '🥛' }
+];
+
+/* ============================================================
+   KONSTANTA GAME
+   ============================================================ */
+const TARGET_CORRECT = 20;
+const MAX_LIVES = 3;
+const STREAK_BONUS = 10;
+const STORAGE_KEY = 'jp_quiz_hall_of_fame';
+const NAME_KEY = 'jp_quiz_player_name';
+
+/* ============================================================
+   STATE GAME
+   ============================================================ */
+const state = {
+  playerName: '',
+  lives: MAX_LIVES,
+  correct: 0,
+  wrong: 0,
+  streak: 0,
+  maxStreak: 0,
+  current: null,
+  wrongItems: [],
+  usedIndices: new Set(),
+  locked: false
+};
+
+/* ============================================================
+   WEBGL BACKGROUND (Three.js)
+   ============================================================ */
+(function initWebGL() {
+  const canvas = document.getElementById('bg');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  camera.position.z = 12;
+
+  const COUNT = 280;
+  const positions = new Float32Array(COUNT * 3);
+  const colors = new Float32Array(COUNT * 3);
+  const speeds = new Float32Array(COUNT);
+
+  for (let i = 0; i < COUNT; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 35;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 35;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 25;
+    // Warna: pink / merah / oranye hangat
+    const hue = Math.random() * 0.12 + 0.92;
+    const color = new THREE.Color().setHSL(hue, 0.75, 0.55 + Math.random() * 0.25);
+    colors[i * 3] = color.r;
+    colors[i * 3 + 1] = color.g;
+    colors[i * 3 + 2] = color.b;
+    speeds[i] = 0.005 + Math.random() * 0.02;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  // Lingkaran bulat untuk partikel
+  const canvas2d = document.createElement('canvas');
+  canvas2d.width = 64; canvas2d.height = 64;
+  const ctx = canvas2d.getContext('2d');
+  const grd = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grd.addColorStop(0, 'rgba(255,255,255,1)');
+  grd.addColorStop(0.5, 'rgba(255,255,255,0.6)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, 64, 64);
+  const texture = new THREE.CanvasTexture(canvas2d);
+
+  const mat = new THREE.PointsMaterial({
+    size: 0.35,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.85,
+    map: texture,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const arr = geo.attributes.position.array;
+    for (let i = 0; i < COUNT; i++) {
+      arr[i * 3 + 1] += speeds[i];
+      if (arr[i * 3 + 1] > 18) {
+        arr[i * 3 + 1] = -18;
+        arr[i * 3] = (Math.random() - 0.5) * 35;
+      }
+    }
+    geo.attributes.position.needsUpdate = true;
+    points.rotation.y += 0.0006;
+    points.rotation.x += 0.0003;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+
+/* ============================================================
+   UTIL
+   ============================================================ */
+function $(id) { return document.getElementById(id); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+function updateHUD() {
+  $('hud-lives').textContent = '❤️'.repeat(state.lives) + '🖤'.repeat(Math.max(0, MAX_LIVES - state.lives));
+  $('hud-correct').textContent = state.correct + '/' + TARGET_CORRECT;
+  $('hud-streak').textContent = state.streak;
+}
+
+/* ============================================================
+   GAME FLOW
+   ============================================================ */
+function startGame() {
+  const nameInput = $('player-name');
+  const name = nameInput.value.trim();
+
+  if (!name) {
+    nameInput.style.borderColor = '#ef4444';
+    nameInput.placeholder = '⚠ Nama tidak boleh kosong!';
+    nameInput.focus();
+    setTimeout(() => { nameInput.style.borderColor = ''; }, 1500);
+    return;
+  }
+
+  localStorage.setItem(NAME_KEY, name);
+
+  state.playerName = name;
+  state.lives = MAX_LIVES;
+  state.correct = 0;
+  state.wrong = 0;
+  state.streak = 0;
+  state.maxStreak = 0;
+  state.wrongItems = [];
+  state.usedIndices = new Set();
+  state.locked = false;
+
+  updateHUD();
+  showScreen('screen-game');
+  nextQuestion();
+}
+
+function nextQuestion() {
+  state.locked = false;
+
+  // Pilih kosakata yang belum dipakai
+  let pool = [];
+  for (let i = 0; i < VOCAB.length; i++) {
+    if (!state.usedIndices.has(i)) pool.push(i);
+  }
+  if (pool.length === 0) {
+    state.usedIndices.clear();
+    pool = VOCAB.map((_, i) => i);
+  }
+
+  const idx = pool[Math.floor(Math.random() * pool.length)];
+  state.usedIndices.add(idx);
+  const correctItem = VOCAB[idx];
+
+  // Pilih 3 distractor
+  const distractors = [];
+  while (distractors.length < 3) {
+    const r = Math.floor(Math.random() * VOCAB.length);
+    if (r !== idx && !distractors.includes(r)) distractors.push(r);
+  }
+
+  const options = [correctItem, ...distractors.map(i => VOCAB[i])];
+  shuffle(options);
+
+  state.current = { correct: correctItem, options };
+
+  renderQuestion(correctItem, options);
+}
+
+function renderQuestion(item, options) {
+  $('question-jp').textContent = item.kanji;
+  $('question-romaji').textContent = item.romaji;
+
+  const grid = $('options-grid');
+  grid.innerHTML = '';
+
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.type = 'button';
+    btn.innerHTML = `<span class="option-emoji">${opt.emoji}</span>`;
+    btn._item = opt;
+    btn.addEventListener('click', () => checkAnswer(btn, opt));
+    grid.appendChild(btn);
+  });
+
+  // Animasi masuk ulang
+  const card = document.querySelector('.question-card');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'cardIn 0.35s ease';
+}
+
+function checkAnswer(btn, chosen) {
+  if (state.locked) return;
+  state.locked = true;
+
+  const correctItem = state.current.correct;
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  if (chosen === correctItem) {
+    // JAWABAN BENAR
+    btn.classList.add('correct');
+    state.correct++;
+    state.streak++;
+    if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+
+    // Bonus nyawa setiap 10 streak
+    if (state.streak % STREAK_BONUS === 0 && state.lives < MAX_LIVES) {
+      state.lives++;
+      showToast('🎉 Bonus Streak! +1 Nyawa ❤️');
+    }
+
+    updateHUD();
+
+    setTimeout(() => {
+      if (state.correct >= TARGET_CORRECT) {
+        endGame(true);
+      } else {
+        nextQuestion();
+      }
+    }, 750);
+  } else {
+    // JAWABAN SALAH
+    btn.classList.add('wrong');
+    allBtns.forEach(b => {
+      if (b._item === correctItem) b.classList.add('correct');
+    });
+
+    state.lives--;
+    state.wrong++;
+    state.streak = 0;
+    state.wrongItems.push(correctItem);
+    updateHUD();
+
+    setTimeout(() => {
+      if (state.lives <= 0) {
+        endGame(false);
+      } else {
+        nextQuestion();
+      }
+    }, 1500);
+  }
+}
+
+function endGame(win) {
+  // Hitung skor: 10 poin per benar, bonus streak
+  const score = state.correct * 10 + state.maxStreak * 5;
+
+  // Tampilkan end screen
+  const header = $('end-header');
+  header.className = 'end-header ' + (win ? 'win' : 'lose');
+  $('end-emoji').textContent = win ? '🎉' : '💔';
+  $('end-title').textContent = win ? 'MENANG!' : 'GAME OVER';
+  $('end-name').textContent = state.playerName;
+
+  $('stat-correct').textContent = state.correct;
+  $('stat-wrong').textContent = state.wrong;
+  $('stat-score').textContent = score;
+
+  renderReview();
+  saveToHallOfFame(win, score);
+  showScreen('screen-end');
+}
+
+function renderReview() {
+  const container = $('review-list');
+  container.innerHTML = '';
+
+  if (state.wrongItems.length === 0) {
+    container.innerHTML = '<div class="no-wrong">🌟 Luar biasa! Tidak ada jawaban salah!</div>';
+    return;
+  }
+
+  state.wrongItems.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'review-item';
+    div.innerHTML = `
+      <div class="review-emoji">${item.emoji}</div>
+      <div class="review-info">
+        <div class="review-kanji">${item.kanji}</div>
+        <div class="review-romaji">${item.romaji}</div>
+        <div class="review-meaning">= ${item.meaning}</div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+/* ============================================================
+   HALL OF FAME (JSON Storage via localStorage)
+   ============================================================ */
+function saveToHallOfFame(win, score) {
+  const data = loadHallOfFame();
+  data.push({
+    name: state.playerName,
+    score: score,
+    correct: state.correct,
+    wrong: state.wrong,
+    maxStreak: state.maxStreak,
+    win: win,
+    date: new Date().toISOString()
+  });
+
+  // Sort: menang dulu, lalu skor tertinggi
+  data.sort((a, b) => {
+    if (a.win !== b.win) return b.win - a.win;
+    return b.score - a.score;
+  });
+
+  // Batasi 50 entri teratas
+  const trimmed = data.slice(0, 50);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+}
+
+function loadHallOfFame() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function renderHallOfFame() {
+  const list = $('hof-list');
+  const data = loadHallOfFame();
+  list.innerHTML = '';
+
+  if (data.length === 0) {
+    list.innerHTML = `
+      <div class="empty-hof">
+        <div class="icon">🏆</div>
+        <p>Belum ada data pemain.<br>Jadilah yang pertama!</p>
+      </div>
+    `;
+    return;
+  }
+
+  data.forEach((entry, i) => {
+    const rank = i + 1;
+    const div = document.createElement('div');
+    div.className = 'hof-item' + (rank <= 3 ? ' rank-' + rank : '');
+
+    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '#' + rank;
+    const date = new Date(entry.date);
+    const dateStr = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    div.innerHTML = `
+      <div class="hof-rank">${medal}</div>
+      <div class="hof-info">
+        <div class="hof-name">${escapeHtml(entry.name)}</div>
+        <div class="hof-meta">${entry.correct}✓ ${entry.wrong}✗ · Skor ${entry.score} · ${dateStr}</div>
+      </div>
+      <div class="hof-badge ${entry.win ? 'win' : 'lose'}">${entry.win ? 'MENANG' : 'GAGAL'}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+/* ============================================================
+   EVENT BINDINGS
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  // Auto-fill nama terakhir
+  const savedName = localStorage.getItem(NAME_KEY);
+  if (savedName) $('player-name').value = savedName;
+
+  // Enter di input untuk mulai
+  $('player-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startGame();
+  });
+
+  $('btn-start').addEventListener('click', startGame);
+  $('btn-hof').addEventListener('click', () => {
+    renderHallOfFame();
+    showScreen('screen-hof');
+  });
+  $('btn-hof-back').addEventListener('click', () => showScreen('screen-menu'));
+  $('btn-play-again').addEventListener('click', startGame);
+  $('btn-back-menu').addEventListener('click', () => showScreen('screen-menu'));
+
+  // Prevent scroll saat menyentuh option button pada iOS
+  document.querySelectorAll('.option-btn').forEach(b => {
+    b.addEventListener('touchstart', e => {}, { passive: true });
+  });
+});
+</script>
+
+</body>
+</html>
