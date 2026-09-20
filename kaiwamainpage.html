@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#05060f">
+<title>Nihongo Talk — Visual Novel Edukasi</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,"Helvetica Neue",sans-serif;
+    background:#05060f;color:#eaeaff;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;touch-action:manipulation;
+  }
+  #gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;}
+  body.no-gl{background:radial-gradient(circle at 30% 20%,#2a1040,#05060f 60%),radial-gradient(circle at 80% 80%,#06303f,#05060f 70%);}
+
+  #app{
+    position:relative;z-index:2;
+    width:100%;max-width:430px;height:100dvh;max-height:920px;
+    background:rgba(8,10,22,.66);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.10);
+    overflow:hidden;
+  }
+  @media(min-width:480px) and (min-height:720px){
+    #app{border-radius:26px;box-shadow:0 24px 80px rgba(0,0,0,.75);}
+  }
+
+  /* ---------- SCREENS ---------- */
+  .screen{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;
+    padding:16px;gap:12px;
+    opacity:0;pointer-events:none;
+    transform:translateY(12px) scale(.99);
+    transition:opacity .3s ease,transform .3s ease;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+  }
+  .screen.active{opacity:1;pointer-events:auto;transform:none;}
+  .screen::-webkit-scrollbar{width:0;}
+
+  /* ---------- MENU ---------- */
+  #screen-menu{justify-content:center;align-items:center;text-align:center;gap:26px;}
+  .logo-jp{
+    font-size:15px;letter-spacing:8px;color:#8fd8ff;opacity:.85;
+    text-shadow:0 0 16px rgba(77,226,255,.7);
+  }
+  .logo-title{
+    font-size:38px;font-weight:800;letter-spacing:1px;line-height:1.05;
+    background:linear-gradient(120deg,#ff7ab8,#a06bff 45%,#4de2ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 6px 22px rgba(160,107,255,.45));
+  }
+  .logo-sub{font-size:13px;color:#b9bfe0;line-height:1.6;max-width:300px;}
+  .menu-actions{width:100%;display:flex;flex-direction:column;gap:12px;max-width:320px;}
+  .ornament{font-size:34px;filter:drop-shadow(0 0 18px rgba(255,122,184,.6));animation:float 3.2s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;padding:15px 18px;border-radius:16px;
+    border:1px solid rgba(255,255,255,.16);
+    background:linear-gradient(135deg,rgba(160,107,255,.32),rgba(77,226,255,.18));
+    color:#fff;font-size:15.5px;font-weight:700;letter-spacing:.4px;
+    cursor:pointer;font-family:inherit;
+    transition:transform .14s ease,box-shadow .22s ease,filter .2s;
+    box-shadow:0 8px 26px rgba(0,0,0,.35);
+  }
+  .btn:active{transform:scale(.965);}
+  .btn:hover{filter:brightness(1.12);}
+  .btn.primary{background:linear-gradient(135deg,#ff5fa2,#a06bff 60%,#4de2ff);border-color:transparent;box-shadow:0 10px 30px rgba(160,107,255,.45);}
+  .btn.ghost{background:rgba(255,255,255,.05);}
+  .btn.small{padding:11px 14px;font-size:13.5px;border-radius:13px;}
+
+  /* ---------- NAME SCREEN ---------- */
+  #screen-name{justify-content:center;gap:18px;}
+  .card{
+    background:rgba(16,18,36,.78);
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:20px;padding:20px;
+    box-shadow:0 14px 40px rgba(0,0,0,.45);
+  }
+  .card h2{font-size:19px;margin-bottom:6px;}
+  .card p{font-size:13px;color:#a9b0d0;line-height:1.6;}
+  .input{
+    width:100%;padding:15px 16px;border-radius:14px;
+    background:rgba(0,0,0,.45);
+    border:1px solid rgba(255,255,255,.18);
+    color:#fff;font-size:16px;font-family:inherit;outline:none;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .input:focus{border-color:#a06bff;box-shadow:0 0 0 3px rgba(160,107,255,.22);}
+  .hint{font-size:12px;color:#8b93b8;text-align:center;}
+
+  /* ---------- HUD ---------- */
+  .hud{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:9px 12px;border-radius:15px;
+    background:rgba(14,16,32,.85);
+    border:1px solid rgba(255,255,255,.12);
+    flex:0 0 auto;
+  }
+  .hud-item{display:flex;flex-direction:column;gap:2px;min-width:64px;}
+  .hud-item.center{align-items:center;}
+  .hud-item.right{align-items:flex-end;}
+  .hud-label{font-size:9px;letter-spacing:1.6px;color:#7d86ab;font-weight:700;}
+  .hud-val{font-size:15px;font-weight:800;color:#8fd8ff;}
+  .hearts{display:flex;gap:1px;font-size:15px;line-height:1;}
+  .heart{transition:transform .25s ease,opacity .25s;}
+  .heart.full{color:#ff5f8f;text-shadow:0 0 9px rgba(255,95,143,.85);}
+  .heart.empty{color:#3a3f5c;opacity:.55;}
+  .heart.pop{animation:heartPop .5s ease;}
+  @keyframes heartPop{0%{transform:scale(1)}45%{transform:scale(1.55)}100%{transform:scale(1)}}
+  .quit-btn{
+    background:transparent;border:1px solid rgba(255,255,255,.16);
+    color:#9aa2c4;border-radius:10px;width:30px;height:30px;
+    font-size:14px;cursor:pointer;font-family:inherit;flex:0 0 auto;
+  }
+  .quit-btn:active{transform:scale(.92);}
+
+  /* ---------- VISUAL NOVEL AREA ---------- */
+  .vn-area{
+    display:flex;gap:10px;align-items:flex-end;flex:0 0 auto;
+  }
+  .npc-wrap{flex:0 0 auto;}
+  .npc-avatar{
+    width:64px;height:64px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:34px;
+    background:radial-gradient(circle at 35% 30%,rgba(160,107,255,.55),rgba(77,226,255,.18));
+    border:2px solid rgba(255,255,255,.22);
+    box-shadow:0 0 26px rgba(160,107,255,.55);
+    animation:breathe 3.4s ease-in-out infinite;
+  }
+  @keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.03)}}
+  .speech{
+    position:relative;flex:1 1 auto;min-width:0;
+    background:linear-gradient(135deg,rgba(24,26,50,.94),rgba(18,20,40,.88));
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:16px;padding:12px 14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.45);
+  }
+  .speech::before{
+    content:"";position:absolute;left:-7px;bottom:16px;
+    width:12px;height:12px;transform:rotate(45deg);
+    background:rgba(22,24,46,.95);
+    border-left:1px solid rgba(255,255,255,.16);
+    border-bottom:1px solid rgba(255,255,255,.16);
+  }
+  .speaker{
+    font-size:10.5px;font-weight:800;letter-spacing:1.4px;
+    color:#ff8cc0;margin-bottom:4px;text-transform:uppercase;
+  }
+  .speech-text{
+    font-size:16px;line-height:1.55;font-weight:600;
+    word-break:break-word;min-height:24px;
+  }
+  .speech-romaji{
+    font-size:11.5px;color:#96a0c8;margin-top:5px;line-height:1.45;
+    font-style:italic;
+  }
+
+  /* ---------- QUESTION PANEL ---------- */
+  .q-panel{
+    flex:1 1 auto;min-height:0;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    display:flex;flex-direction:column;gap:10px;
+    padding-bottom:6px;
+  }
+  .q-panel::-webkit-scrollbar{width:0;}
+  .q-instruction{
+    font-size:12.5px;color:#a9b2d6;line-height:1.5;
+    background:rgba(255,255,255,.045);
+    border-left:3px solid #a06bff;
+    border-radius:0 10px 10px 0;
+    padding:9px 12px;
+  }
+  .options{display:flex;flex-direction:column;gap:9px;}
+  .opt{
+    width:100%;padding:14px 16px;border-radius:14px;
+    background:rgba(255,255,255,.055);
+    border:1.5px solid rgba(255,255,255,.14);
+    color:#eaeaff;font-size:16px;font-weight:600;font-family:inherit;
+    cursor:pointer;text-align:center;line-height:1.45;
+    transition:transform .13s ease,background .2s,border-color .2s;
+    word-break:break-word;
+  }
+  .opt:active{transform:scale(.975);}
+  .opt:disabled{cursor:default;}
+  .opt.correct{
+    background:linear-gradient(135deg,rgba(60,220,140,.35),rgba(40,180,120,.22));
+    border-color:#3fe08c;color:#c9ffe3;
+    box-shadow:0 0 22px rgba(63,224,140,.4);
+    animation:pulseOk .45s ease;
+  }
+  .opt.wrong{
+    background:linear-gradient(135deg,rgba(255,80,110,.35),rgba(200,40,80,.2));
+    border-color:#ff5f7e;color:#ffd4dc;
+    animation:shake .42s ease;
+  }
+  @keyframes pulseOk{0%{transform:scale(1)}50%{transform:scale(1.035)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+
+  /* ---------- SCRAMBLE ---------- */
+  .scramble{display:flex;flex-direction:column;gap:11px;}
+  .slot-label{font-size:10.5px;letter-spacing:1.5px;color:#7d86ab;font-weight:800;}
+  .answer-row{
+    min-height:56px;display:flex;flex-wrap:wrap;gap:7px;align-items:center;
+    padding:10px;border-radius:14px;
+    background:rgba(0,0,0,.34);
+    border:1.5px dashed rgba(160,107,255,.5);
+  }
+  .answer-row:empty::after{
+    content:"ketuk kata di bawah untuk menyusun…";
+    font-size:12px;color:#5d6488;font-style:italic;
+  }
+  .chunk-pool{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;}
+  .chunk{
+    padding:10px 14px;border-radius:12px;
+    background:linear-gradient(135deg,rgba(160,107,255,.3),rgba(77,226,255,.16));
+    border:1.5px solid rgba(255,255,255,.2);
+    color:#fff;font-size:15px;font-weight:600;font-family:inherit;
+    cursor:pointer;transition:transform .13s ease,filter .2s;
+    word-break:keep-all;
+  }
+  .chunk:active{transform:scale(.93);}
+  .chunk.placed{
+    background:linear-gradient(135deg,rgba(77,226,255,.32),rgba(160,107,255,.22));
+    border-color:#7fe4ff;
+    box-shadow:0 0 14px rgba(77,226,255,.35);
+  }
+  .scramble-actions{display:flex;gap:9px;}
+  .scramble-actions .btn{flex:1;}
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:absolute;left:50%;top:76px;transform:translate(-50%,-14px);
+    background:linear-gradient(135deg,#ff5fa2,#a06bff);
+    color:#fff;font-size:13.5px;font-weight:800;letter-spacing:.5px;
+    padding:10px 20px;border-radius:30px;
+    box-shadow:0 10px 34px rgba(255,95,162,.55);
+    opacity:0;pointer-events:none;transition:all .32s ease;z-index:50;
+    white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+
+  /* ---------- RESULT ---------- */
+  #screen-result{gap:12px;}
+  .result-head{text-align:center;padding:6px 0 2px;}
+  .result-title{font-size:29px;font-weight:900;letter-spacing:1.5px;}
+  .result-title.win{background:linear-gradient(120deg,#5cffb0,#4de2ff,#a06bff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .result-title.lose{background:linear-gradient(120deg,#ff6b8f,#ff9d5c);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .result-sub{font-size:12.5px;color:#a9b2d6;margin-top:5px;}
+  .score-big{
+    font-size:44px;font-weight:900;line-height:1;
+    background:linear-gradient(120deg,#ffe066,#ff9d5c);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    margin-top:8px;
+  }
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;}
+  .stat{
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.11);
+    border-radius:14px;padding:11px;text-align:center;
+  }
+  .stat .v{font-size:21px;font-weight:900;color:#8fd8ff;}
+  .stat .v.green{color:#5cffb0;}
+  .stat .v.red{color:#ff8098;}
+  .stat .k{font-size:10px;letter-spacing:1.2px;color:#7d86ab;margin-top:3px;font-weight:700;}
+
+  .review-title{font-size:13px;font-weight:800;letter-spacing:1.3px;color:#ffb0c8;margin-top:6px;}
+  .review-item{
+    background:rgba(255,80,110,.09);
+    border:1px solid rgba(255,95,143,.28);
+    border-left:3px solid #ff5f8f;
+    border-radius:12px;padding:12px;margin-top:9px;font-size:13px;line-height:1.6;
+  }
+  .review-item .q{color:#ffd4dc;font-weight:700;margin-bottom:5px;}
+  .review-item .row{color:#c3cae6;}
+  .review-item .row b{color:#5cffb0;}
+  .review-item .row.bad b{color:#ff8098;}
+  .review-item .exp{
+    margin-top:7px;padding-top:7px;border-top:1px dashed rgba(255,255,255,.16);
+    color:#9fa8cc;font-size:12px;white-space:pre-line;
+  }
+  .review-empty{
+    text-align:center;color:#5cffb0;font-size:13px;padding:16px;
+    background:rgba(60,220,140,.09);border-radius:12px;margin-top:8px;
+    border:1px solid rgba(60,220,140,.25);
+  }
+
+  /* ---------- HALL OF FAME ---------- */
+  #screen-fame{gap:12px;}
+  .fame-head{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
+  .fame-head h2{font-size:20px;flex:1;}
+  .fame-list{display:flex;flex-direction:column;gap:9px;padding-bottom:8px;}
+  .fame-item{
+    display:flex;align-items:center;gap:11px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.11);
+    border-radius:15px;padding:11px 13px;
+    transition:transform .2s;
+  }
+  .fame-item.top1{background:linear-gradient(135deg,rgba(255,215,80,.18),rgba(255,157,92,.09));border-color:rgba(255,215,80,.45);}
+  .fame-item.top2{background:linear-gradient(135deg,rgba(200,210,230,.16),rgba(160,170,200,.07));border-color:rgba(200,210,230,.35);}
+  .fame-item.top3{background:linear-gradient(135deg,rgba(205,127,80,.16),rgba(160,100,60,.07));border-color:rgba(205,127,80,.4);}
+  .rank{
+    width:34px;height:34px;flex:0 0 auto;border-radius:11px;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:14px;
+    background:rgba(0,0,0,.4);color:#8fd8ff;
+    border:1px solid rgba(255,255,255,.13);
+  }
+  .fame-item.top1 .rank{background:linear-gradient(135deg,#ffd750,#ff9d5c);color:#241a00;border-color:transparent;}
+  .fame-item.top2 .rank{background:linear-gradient(135deg,#dfe6f5,#9aa6c2);color:#1a1e2c;border-color:transparent;}
+  .fame-item.top3 .rank{background:linear-gradient(135deg,#e0a06a,#b06a3a);color:#241200;border-color:transparent;}
+  .fame-info{flex:1 1 auto;min-width:0;}
+  .fame-name{font-size:14.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fame-meta{font-size:11px;color:#8b93b8;margin-top:3px;display:flex;flex-wrap:wrap;gap:8px;}
+  .badge{
+    display:inline-block;padding:1.5px 7px;border-radius:7px;font-size:9.5px;font-weight:800;letter-spacing:.6px;
+  }
+  .badge.win{background:rgba(60,220,140,.22);color:#5cffb0;}
+  .badge.lose{background:rgba(255,95,143,.2);color:#ff8098;}
+  .fame-score{
+    font-size:17px;font-weight:900;color:#ffe066;text-align:right;flex:0 0 auto;
+  }
+  .fame-score small{display:block;font-size:9px;color:#7d86ab;letter-spacing:1px;font-weight:700;}
+  .empty-fame{
+    text-align:center;color:#8b93b8;font-size:13px;padding:36px 16px;line-height:1.7;
+  }
+  .empty-fame .big{font-size:42px;display:block;margin-bottom:10px;opacity:.6;}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="app">
+
+  <!-- ============ MENU ============ -->
+  <section class="screen active" id="screen-menu">
+    <div class="ornament">🎌</div>
+    <div>
+      <div class="logo-jp">日本語会話</div>
+      <div class="logo-title">NIHONGO<br>TALK</div>
+    </div>
+    <p class="logo-sub">Visual novel edukasi untuk mengenal percakapan dasar bahasa Jepang. Jawab 15 pertanyaan dengan benar sebelum nyawamu habis!</p>
+    <div class="menu-actions">
+      <button class="btn primary" id="btnStart">▶  MULAI PERMAINAN</button>
+      <button class="btn ghost" id="btnFame">🏆  HALL OF FAME</button>
+    </div>
+    <div class="hint">© Nihongo Talk · WebGL + Local JSON Storage</div>
+  </section>
+
+  <!-- ============ NAME ============ -->
+  <section class="screen" id="screen-name">
+    <div class="card">
+      <h2>👤 Siapa namamu?</h2>
+      <p>Masukkan namamu untuk memulai petualangan percakapan bahasa Jepang.</p>
+    </div>
+    <input class="input" id="inputName" type="text" maxlength="14" placeholder="Ketik namamu di sini…" autocomplete="off" spellcheck="false">
+    <button class="btn primary" id="btnNameGo">MULAI  ▶</button>
+    <button class="btn ghost small" id="btnNameBack">← Kembali ke Menu</button>
+    <div class="hint">Nyawa awal: ❤❤❤❤❤ &nbsp;|&nbsp; Target: 15 jawaban benar</div>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section class="screen" id="screen-game">
+    <div class="hud">
+      <div class="hud-item">
+        <span class="hud-label">NYAWA</span>
+        <div class="hearts" id="hudLives"></div>
+      </div>
+      <div class="hud-item center">
+        <span class="hud-label">BENAR</span>
+        <div class="hud-val" id="hudProgress">0/15</div>
+      </div>
+      <div class="hud-item right">
+        <span class="hud-label">STREAK</span>
+        <div class="hud-val" id="hudStreak">0</div>
+      </div>
+      <button class="quit-btn" id="btnQuit" title="Keluar">✕</button>
+    </div>
+
+    <div class="vn-area">
+      <div class="npc-wrap"><div class="npc-avatar" id="npcAvatar">👩‍🏫</div></div>
+      <div class="speech">
+        <div class="speaker" id="speakerName">Aoi-sensei</div>
+        <div class="speech-text" id="speechText"></div>
+        <div class="speech-romaji" id="speechRomaji"></div>
+      </div>
+    </div>
+
+    <div class="q-panel">
+      <div class="q-instruction" id="qInstruction"></div>
+      <div class="q-body" id="qBody"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section class="screen" id="screen-result">
+    <div class="result-head">
+      <div class="result-title" id="resultTitle">MENANG</div>
+      <div class="result-sub" id="resultSub"></div>
+      <div class="score-big" id="resultScore">0</div>
+      <div class="hint" style="margin-top:2px">SKOR AKHIR</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat"><div class="v green" id="statCorrect">0</div><div class="k">BENAR</div></div>
+      <div class="stat"><div class="v red" id="statWrong">0</div><div class="k">SALAH</div></div>
+      <div class="stat"><div class="v" id="statStreak">0</div><div class="k">STREAK TERBAIK</div></div>
+      <div class="stat"><div class="v" id="statLives">0</div><div class="k">SISA NYAWA</div></div>
+    </div>
+
+    <div class="review-title" id="reviewTitle">📘 MATERI PEMBAHASAN</div>
+    <div id="reviewList"></div>
+
+    <button class="btn primary" id="btnPlayAgain" style="margin-top:12px">🔁  MAIN LAGI</button>
+    <button class="btn ghost" id="btnResultMenu">🏠  MENU UTAMA</button>
+    <button class="btn ghost" id="btnResultFame">🏆  LIHAT HALL OF FAME</button>
+  </section>
+
+  <!-- ============ HALL OF FAME ============ -->
+  <section class="screen" id="screen-fame">
+    <div class="fame-head">
+      <button class="quit-btn" id="btnFameBack">←</button>
+      <h2>🏆 Hall of Fame</h2>
+      <button class="quit-btn" id="btnFameClear" title="Hapus semua data">🗑</button>
+    </div>
+    <div class="fame-list" id="fameList"></div>
+  </section>
+
+</div>
+
+<script>
+/* =======================================================================
+   1. DATABASE PERCAKAPAN (50 ENTRI)
+   ======================================================================= */
+
+/* --- TIPE 1 : Menjawab salam NPC (17 entri) --- */
+const GREETINGS = [
+  { npc:"おはようございます。", npcR:"Ohayou gozaimasu.", npcI:"Selamat pagi.",
+    ans:"おはようございます。", ansR:"Ohayou gozaimasu.", ansI:"Selamat pagi.",
+    note:"「おはようございます」dipakai pada pagi hari (sekitar sebelum jam 11). Dijawab dengan ucapan yang sama." },
+
+  { npc:"こんにちは。", npcR:"Konnichiwa.", npcI:"Selamat siang.",
+    ans:"こんにちは。", ansR:"Konnichiwa.", ansI:"Selamat siang.",
+    note:"「こんにちは」dipakai pada siang hingga sore hari saat bertemu seseorang." },
+
+  { npc:"こんばんは。", npcR:"Konbanwa.", npcI:"Selamat malam.",
+    ans:"こんばんは。", ansR:"Konbanwa.", ansI:"Selamat malam.",
+    note:"「こんばんは」dipakai saat bertemu pada malam hari (setelah gelap)." },
+
+  { npc:"はじめまして。", npcR:"Hajimemashite.", npcI:"Salam kenal.",
+    ans:"はじめまして、よろしくおねがいします。", ansR:"Hajimemashite, yoroshiku onegaishimasu.", ansI:"Salam kenal, mohon bantuannya.",
+    note:"Saat berkenalan pertama kali, 「はじめまして」diikuti dengan 「よろしくおねがいします」." },
+
+  { npc:"ありがとうございます。", npcR:"Arigatou gozaimasu.", npcI:"Terima kasih.",
+    ans:"どういたしまして。", ansR:"Dou itashimashite.", ansI:"Tidak perlu sungkan / sama-sama.",
+    note:"「どういたしまして」adalah balasan standar untuk ucapan terima kasih." },
+
+  { npc:"ごめんなさい。", npcR:"Gomen nasai.", npcI:"Maaf.",
+    ans:"いいえ、だいじょうぶです。", ansR:"Iie, daijoubu desu.", ansI:"Tidak, tidak apa-apa.",
+    note:"Ucapan maaf dijawab dengan memaafkan, misalnya 「いいえ、だいじょうぶです」." },
+
+  { npc:"さようなら。", npcR:"Sayounara.", npcI:"Selamat tinggal.",
+    ans:"さようなら、また あした。", ansR:"Sayounara, mata ashita.", ansI:"Selamat tinggal, sampai besok.",
+    note:"「さようなら」dipakai untuk perpisahan yang cukup lama. 「また あした」= sampai besok." },
+
+  { npc:"おやすみなさい。", npcR:"Oyasuminasai.", npcI:"Selamat tidur.",
+    ans:"おやすみなさい。", ansR:"Oyasuminasai.", ansI:"Selamat tidur.",
+    note:"Diucapkan sebelum tidur, dan dijawab dengan ucapan yang sama." },
+
+  { npc:"おげんきですか。", npcR:"O-genki desu ka.", npcI:"Apa kabar?",
+    ans:"はい、おかげさまで。", ansR:"Hai, okagesama de.", ansI:"Ya, baik berkat doa Anda.",
+    note:"Menanyakan kabar dijawab dengan 「はい、おかげさまで」atau 「はい、げんきです」." },
+
+  { npc:"おめでとうございます。", npcR:"Omedetou gozaimasu.", npcI:"Selamat!",
+    ans:"ありがとうございます。", ansR:"Arigatou gozaimasu.", ansI:"Terima kasih.",
+    note:"Ucapan selamat dibalas dengan ucapan terima kasih." },
+
+  { npc:"いってきます。", npcR:"Ittekimasu.", npcI:"Aku pergi dulu (meninggalkan rumah).",
+    ans:"いってらっしゃい。", ansR:"Itterasshai.", ansI:"Hati-hati di jalan.",
+    note:"「いってきます」diucapkan oleh yang pergi, dijawab 「いってらっしゃい」oleh yang di rumah." },
+
+  { npc:"ただいま。", npcR:"Tadaima.", npcI:"Aku pulang.",
+    ans:"おかえりなさい。", ansR:"Okaerinasai.", ansI:"Selamat datang kembali.",
+    note:"「ただいま」diucapkan saat pulang ke rumah, dijawab dengan 「おかえりなさい」." },
+
+  { npc:"いらっしゃいませ。", npcR:"Irasshaimase.", npcI:"Selamat datang (di toko).",
+    ans:"すみません、メニューを ください。", ansR:"Sumimasen, menyuu o kudasai.", ansI:"Permisi, tolong menunya.",
+    note:"「いらっしゃいませ」diucapkan pegawai toko. Pembeli biasanya memulai dengan 「すみません」." },
+
+  { npc:"おねがいします。", npcR:"Onegaishimasu.", npcI:"Tolong / mohon.",
+    ans:"はい、わかりました。", ansR:"Hai, wakarimashita.", ansI:"Ya, saya mengerti.",
+    note:"Permintaan dijawab dengan 「はい、わかりました」= baik, saya mengerti." },
+
+  { npc:"どうぞ。", npcR:"Douzo.", npcI:"Silakan.",
+    ans:"ありがとうございます。", ansR:"Arigatou gozaimasu.", ansI:"Terima kasih.",
+    note:"Saat dipersilakan sesuatu, ucapkan terima kasih." },
+
+  { npc:"しつれいします。", npcR:"Shitsurei shimasu.", npcI:"Permisi (masuk/keluar ruangan).",
+    ans:"しつれいします。", ansR:"Shitsurei shimasu.", ansI:"Permisi.",
+    note:"「しつれいします」dipakai saat masuk atau keluar ruangan, dapat dibalas dengan ucapan yang sama." },
+
+  { npc:"おかえりなさい。", npcR:"Okaerinasai.", npcI:"Selamat datang kembali.",
+    ans:"ただいま。", ansR:"Tadaima.", ansI:"Aku pulang.",
+    note:"「おかえりなさい」dijawab dengan 「ただいま」." }
+];
+
+/* --- TIPE 2 : Partikel (17 entri) --- */
+const PARTICLES = [
+  { before:"わたし", after:"がくせいです。", ans:"は", opts:["は","を","に","へ"],
+    romaji:"Watashi wa gakusei desu.", id:"Saya adalah pelajar.",
+    note:"「は」adalah partikel topik, menandai apa yang sedang dibicarakan." },
+
+  { before:"これ", after:"わたしの ほんです。", ans:"は", opts:["は","を","で","に"],
+    romaji:"Kore wa watashi no hon desu.", id:"Ini adalah buku saya.",
+    note:"「は」menandai topik kalimat, yaitu 「これ」(ini)." },
+
+  { before:"わたしは にほんご", after:"べんきょうします。", ans:"を", opts:["を","は","に","が"],
+    romaji:"Watashi wa nihongo o benkyou shimasu.", id:"Saya belajar bahasa Jepang.",
+    note:"「を」menandai objek langsung dari kata kerja 「べんきょうします」." },
+
+  { before:"がっこう", after:"べんきょうします。", ans:"で", opts:["で","に","を","へ"],
+    romaji:"Gakkou de benkyou shimasu.", id:"Belajar di sekolah.",
+    note:"「で」menandai tempat terjadinya suatu kegiatan." },
+
+  { before:"パン", after:"たべます。", ans:"を", opts:["を","が","に","は"],
+    romaji:"Pan o tabemasu.", id:"Makan roti.",
+    note:"「を」menandai objek yang dimakan." },
+
+  { before:"ともだち", after:"あいます。", ans:"に", opts:["に","を","で","は"],
+    romaji:"Tomodachi ni aimasu.", id:"Bertemu teman.",
+    note:"Kata kerja 「あいます」(bertemu) menggunakan partikel 「に」." },
+
+  { before:"へや", after:"ねこが います。", ans:"に", opts:["に","を","で","へ"],
+    romaji:"Heya ni neko ga imasu.", id:"Di kamar ada kucing.",
+    note:"「に」menandai tempat keberadaan untuk kata kerja 「います」/「あります」." },
+
+  { before:"えき", after:"でんしゃで いきます。", ans:"まで", opts:["まで","から","を","に"],
+    romaji:"Eki made densha de ikimasu.", id:"Pergi sampai stasiun dengan kereta.",
+    note:"「まで」menandai batas akhir tujuan." },
+
+  { before:"7じ", after:"おきます。", ans:"に", opts:["に","で","を","は"],
+    romaji:"Shichi-ji ni okimasu.", id:"Bangun tidur pada jam 7.",
+    note:"「に」dipakai untuk menandai waktu yang spesifik (jam, tanggal)." },
+
+  { before:"にほんご", after:"えいごを はなします。", ans:"と", opts:["と","を","に","が"],
+    romaji:"Nihongo to eigo o hanashimasu.", id:"Berbicara bahasa Jepang dan bahasa Inggris.",
+    note:"「と」menghubungkan dua kata benda setara (dan)." },
+
+  { before:"コーヒー", after:"のみます。", ans:"を", opts:["を","に","が","で"],
+    romaji:"Koohii o nomimasu.", id:"Minum kopi.",
+    note:"「を」menandai objek dari kata kerja 「のみます」(minum)." },
+
+  { before:"わたしは インドネシア", after:"きました。", ans:"から", opts:["から","まで","に","で"],
+    romaji:"Watashi wa Indonesia kara kimashita.", id:"Saya datang dari Indonesia.",
+    note:"「から」menandai titik awal / asal." },
+
+  { before:"いぬ", after:"すきです。", ans:"が", opts:["が","を","に","で"],
+    romaji:"Inu ga suki desu.", id:"Saya suka anjing.",
+    note:"Kata 「すき」menggunakan partikel 「が」untuk objek yang disukai." },
+
+  { before:"じてんしゃ", after:"のります。", ans:"に", opts:["に","を","で","が"],
+    romaji:"Jitensha ni norimasu.", id:"Naik sepeda.",
+    note:"Kata kerja 「のります」(naik) menggunakan partikel 「に」." },
+
+  { before:"だれ", after:"きましたか。", ans:"が", opts:["が","は","を","に"],
+    romaji:"Dare ga kimashita ka.", id:"Siapa yang datang?",
+    note:"Kata tanya seperti 「だれ」diikuti partikel 「が」sebagai subjek." },
+
+  { before:"ほん", after:"よみます。", ans:"を", opts:["を","が","に","と"],
+    romaji:"Hon o yomimasu.", id:"Membaca buku.",
+    note:"「を」menandai objek dari kata kerja 「よみます」(membaca)." },
+
+  { before:"でんしゃ", after:"いきます。", ans:"で", opts:["で","に","を","と"],
+    romaji:"Densha de ikimasu.", id:"Pergi dengan kereta.",
+    note:"「で」menandai alat transportasi yang digunakan." }
+];
+
+/* --- TIPE 3 : Menyusun ucapan teracak (16 entri) --- */
+const SCRAMBLE = [
+  { chunks:["わたしは","アニ","です"], romaji:"Watashi wa Ani desu.", id:"Saya Ani.",
+    note:"Pola: [Topik] は [Nama] です." },
+  { chunks:["これは","わたしの","ほん","です"], romaji:"Kore wa watashi no hon desu.", id:"Ini adalah buku saya.",
+    note:"Pola: これ は [pemilik] の [benda] です." },
+  { chunks:["にほんごを","べんきょう","します"], romaji:"Nihongo o benkyou shimasu.", id:"Saya belajar bahasa Jepang.",
+    note:"Kata kerja 「べんきょうします」= belajar; objek ditandai 「を」." },
+  { chunks:["おなまえは","なん","ですか"], romaji:"O-namae wa nan desu ka.", id:"Siapa nama Anda?",
+    note:"Pola tanya: [topik] は なん ですか." },
+  { chunks:["わたしは","インドネシア","じん","です"], romaji:"Watashi wa Indonesia-jin desu.", id:"Saya orang Indonesia.",
+    note:"Kewarganegaraan dibentuk dengan menambahkan 「じん」." },
+  { chunks:["まいにち","がっこうへ","いきます"], romaji:"Mainichi gakkou e ikimasu.", id:"Setiap hari pergi ke sekolah.",
+    note:"「へ」menandai arah tujuan pergerakan." },
+  { chunks:["とても","おいしい","です"], romaji:"Totemo oishii desu.", id:"Sangat enak.",
+    note:"「とても」= sangat, diletakkan sebelum kata sifat." },
+  { chunks:["すみません","えきは","どこ","ですか"], romaji:"Sumimasen, eki wa doko desu ka.", id:"Permisi, stasiun di mana?",
+    note:"Pola menanyakan tempat: [tempat] は どこ ですか." },
+  { chunks:["わたしは","コーヒーが","すき","です"], romaji:"Watashi wa koohii ga suki desu.", id:"Saya suka kopi.",
+    note:"「すき」menggunakan partikel 「が」." },
+  { chunks:["きょうは","あつい","ですね"], romaji:"Kyou wa atsui desu ne.", id:"Hari ini panas ya.",
+    note:"「ね」di akhir kalimat mencari persetujuan lawan bicara." },
+  { chunks:["どうぞ","よろしく","おねがいします"], romaji:"Douzo yoroshiku onegaishimasu.", id:"Mohon bantuannya / salam kenal.",
+    note:"Ungkapan lengkap saat berkenalan." },
+  { chunks:["ゆっくり","はなして","ください"], romaji:"Yukkuri hanashite kudasai.", id:"Tolong bicara pelan-pelan.",
+    note:"Pola permintaan: [kata kerja bentuk て] + ください." },
+  { chunks:["たんじょうび","おめでとう","ございます"], romaji:"Tanjoubi omedetou gozaimasu.", id:"Selamat ulang tahun.",
+    note:"Ucapan ulang tahun standar dalam bahasa Jepang." },
+  { chunks:["にほんへ","いきたい","です"], romaji:"Nihon e ikitai desu.", id:"Saya ingin pergi ke Jepang.",
+    note:"「～たいです」menyatakan keinginan melakukan sesuatu." },
+  { chunks:["あした","また","あいましょう"], romaji:"Ashita mata aimashou.", id:"Besok kita bertemu lagi.",
+    note:"「～ましょう」= ajakan untuk melakukan sesuatu bersama." },
+  { chunks:["これは","いくら","ですか"], romaji:"Kore wa ikura desu ka.", id:"Ini berapa harganya?",
+    note:"「いくら」= berapa (harga)." }
+];
+
+/* =======================================================================
+   2. UTILITAS
+   ======================================================================= */
+const $ = id => document.getElementById(id);
+const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const uniq = arr => [...new Set(arr)];
+const rnd = arr => arr[Math.floor(Math.random() * arr.length)];
+
+/* =======================================================================
+   3. PENYIMPANAN (JSON / localStorage)
+   ======================================================================= */
+const LS_KEY = 'nihongo_talk_hall_of_fame_v1';
+
+function loadHoF() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : [];
+  } catch (e) { console.warn('Gagal membaca data:', e); return []; }
+}
+function saveHoF(list) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(list)); }
+  catch (e) { console.warn('Gagal menyimpan data:', e); }
+}
+function addRecord(rec) {
+  const list = loadHoF();
+  list.push(rec);
+  list.sort((a, b) => (b.score - a.score) || (b.correct - a.correct) || (new Date(a.date) - new Date(b.date)));
+  saveHoF(list.slice(0, 100));
+}
+
+/* =======================================================================
+   4. WEBGL BACKGROUND
+   ======================================================================= */
+(function initGL() {
+  const canvas = $('gl');
+  const gl = canvas.getContext('webgl', { antialias: false, alpha: false, depth: false, stencil: false })
+          || canvas.getContext('experimental-webgl');
+  if (!gl) { canvas.style.display = 'none'; document.body.classList.add('no-gl'); return; }
+
+  const VS = `attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }`;
+
+  const FS = `
+    precision highp float;
+    uniform vec2  u_res;
+    uniform float u_time;
+
+    void main(){
+      vec2 uv = gl_FragCoord.xy / u_res.xy;
+      float t = u_time * 0.22;
+
+      vec3 c1 = vec3(0.035, 0.045, 0.115);   // deep navy
+      vec3 c2 = vec3(0.300, 0.090, 0.380);   // purple
+      vec3 c3 = vec3(0.030, 0.300, 0.430);   // cyan
+      vec3 c4 = vec3(0.560, 0.130, 0.320);   // pink
+
+      float a = 0.5 + 0.5 * sin(uv.x * 2.2 + t * 0.9 + sin(uv.y * 3.1 - t * 0.7));
+      float b = 0.5 + 0.5 * cos(uv.y * 2.6 - t * 1.1 + cos(uv.x * 2.0 + t * 0.6));
+      float c = 0.5 + 0.5 * sin((uv.x + uv.y) * 2.4 + t * 0.8);
+
+      vec3 col = mix(c1, c2, a);
+      col = mix(col, c3, b * 0.65);
+      col = mix(col, c4, c * 0.35);
+
+      // partikel cahaya
+      vec2 g = uv * 6.0;
+      float star = smoothstep(0.965, 1.0, sin(g.x * 12.9898 + g.y * 78.233 + t * 3.0) * 0.5 + 0.5);
+      col += vec3(0.35, 0.45, 0.75) * star * 0.35;
+
+      // vignette
+      float d = distance(uv, vec2(0.5, 0.45));
+      col *= smoothstep(1.10, 0.15, d);
+
+      gl_FragColor = vec4(col, 1.0);
+    }`;
+
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.warn(gl.getShaderInfoLog(s));
+      return null;
+    }
+    return s;
+  }
+
+  const vs = compile(gl.VERTEX_SHADER, VS);
+  const fs = compile(gl.FRAGMENT_SHADER, FS);
+  if (!vs || !fs) { canvas.style.display = 'none'; document.body.classList.add('no-gl'); return; }
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    canvas.style.display = 'none'; document.body.classList.add('no-gl'); return;
+  }
+  gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+    -1, -1, 1, -1, -1, 1,
+    -1, 1, 1, -1, 1, 1
+  ]), gl.STATIC_DRAW);
+
+  const loc = gl.getAttribLocation(prog, 'p');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+  const uRes = gl.getUniformLocation(prog, 'u_res');
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.floor(canvas.clientWidth * dpr);
+    const h = Math.floor(canvas.clientHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w; canvas.height = h;
+      gl.viewport(0, 0, w, h);
+    }
+  }
+
+  const t0 = performance.now();
+  function loop() {
+    resize();
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform1f(uTime, (performance.now() - t0) / 1000);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  window.addEventListener('resize', resize);
+})();
+
+/* =======================================================================
+   5. STATE & ALUR PERMAINAN
+   ======================================================================= */
+const TARGET_CORRECT = 15;
+const MAX_LIVES = 5;
+const STREAK_BONUS = 5;
+
+const game = {
+  name: '',
+  lives: MAX_LIVES,
+  correct: 0,
+  wrong: 0,
+  streak: 0,
+  bestStreak: 0,
+  locked: false,
+  current: null,
+  wrongLog: [],
+  typeQueue: [],
+  used: { 1: new Set(), 2: new Set(), 3: new Set() }
+};
+
+/* ---------- Manajemen layar ---------- */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = $(id);
+  if (el) { el.classList.add('active'); el.scrollTop = 0; }
+}
+
+/* ---------- Toast ---------- */
+let toastTimer = null;
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ---------- Typewriter ---------- */
+let typeTimer = null;
+function typeText(el, text, speed = 26) {
+  clearInterval(typeTimer);
+  el.textContent = '';
+  let i = 0;
+  if (!text) return;
+  typeTimer = setInterval(() => {
+    el.textContent += text.charAt(i);
+    i++;
+    if (i >= text.length) clearInterval(typeTimer);
+  }, speed);
+}
+
+/* ---------- HUD ---------- */
+function updateHUD(popIndex) {
+  const hearts = $('hudLives');
+  let html = '';
+  for (let i = 0; i < MAX_LIVES; i++) {
+    const full = i < game.lives;
+    const pop = (popIndex === i) ? ' pop' : '';
+    html += `<span class="heart ${full ? 'full' : 'empty'}${pop}">♥</span>`;
+  }
+  hearts.innerHTML = html;
+  $('hudProgress').textContent = `${game.correct}/${TARGET_CORRECT}`;
+  $('hudStreak').textContent = game.streak;
+}
+
+/* ---------- Pemilihan tipe soal (proporsional 1:1:1) ---------- */
+function nextType() {
+  if (game.typeQueue.length === 0) {
+    game.typeQueue = shuffle([1, 2, 3, 1, 2, 3, 1, 2, 3]);
+  }
+  return game.typeQueue.shift();
+}
+
+/* ---------- Ambil entri acak tanpa pengulangan ---------- */
+function pickEntry(type) {
+  const list = type === 1 ? GREETINGS : type === 2 ? PARTICLES : SCRAMBLE;
+  let avail = list.map((_, i) => i).filter(i => !game.used[type].has(i));
+  if (avail.length === 0) {
+    game.used[type].clear();
+    avail = list.map((_, i) => i);
+  }
+  const idx = rnd(avail);
+  game.used[type].add(idx);
+  return list[idx];
+}
+
+/* ---------- Builder soal ---------- */
+function buildQ1(e) {
+  const pool = uniq(GREETINGS.map(g => g.ans).filter(a => a !== e.ans));
+  const distractors = shuffle(pool).slice(0, 3);
+  const options = shuffle([e.ans, ...distractors]);
+  return {
+    type: 1,
+    speaker: 'Aoi-sensei',
+    speech: e.npc,
+    speechSub: `${e.npcR}  —  "${e.npcI}"`,
+    question: 'Bagaimana kamu menjawab sapaan di atas dengan tepat?',
+    options,
+    answer: e.ans,
+    review: {
+      q: `NPC berkata: ${e.npc}`,
+      correct: `${e.ans}  (${e.ansR}) = "${e.ansI}"`,
+      explain: e.note
+    }
+  };
+}
+
+function buildQ2(e) {
+  return {
+    type: 2,
+    speaker: 'Aoi-sensei',
+    speech: `${e.before} ＿＿＿ ${e.after}`,
+    speechSub: 'Ada partikel yang hilang…',
+    question: 'Partikel apa yang tepat untuk melengkapi kalimat di atas?',
+    options: shuffle(e.opts.slice()),
+    answer: e.ans,
+    review: {
+      q: `Kalimat: ${e.before} ＿＿＿ ${e.after}`,
+      correct: `${e.before}${e.ans}${e.after}  →  partikel 「${e.ans}」`,
+      explain: `${e.romaji}\nArtinya: ${e.id}\n${e.note}`
+    }
+  };
+}
+
+/* ✅ REVISI: properti jawaban disimpan sebagai `answer` agar konsisten
+   dengan pengecekan di onChoice(). Sebelumnya memakai `correct` sehingga
+   q.answer bernilai undefined dan semua jawaban tipe 3 dianggap salah. */
+function buildQ3(e) {
+  const correctStr = e.chunks.join(' ');
+  let scrambled = shuffle(e.chunks.slice());
+  let guard = 0;
+  while (scrambled.join(' ') === correctStr && guard < 12) {
+    scrambled = shuffle(e.chunks.slice());
+    guard++;
+  }
+  return {
+    type: 3,
+    speaker: 'Aoi-sensei',
+    speech: scrambled.join(' ／ '),
+    speechSub: 'Aduh, ucapanku jadi teracak…',
+    question: 'Susun kembali ucapan di atas menjadi kalimat yang benar.',
+    chunks: scrambled,
+    answer: correctStr,           // ✅ konsisten dengan onChoice()
+    review: {
+      q: `Susunan teracak: ${scrambled.join(' / ')}`,
+      correct: correctStr,
+      explain: `${e.romaji}\nArtinya: ${e.id}\n${e.note}`
+    }
+  };
+}
+
+function buildQuestion(type, entry) {
+  if (type === 1) return buildQ1(entry);
+  if (type === 2) return buildQ2(entry);
+  return buildQ3(entry);
+}
+
+/* ---------- Render soal ---------- */
+function nextQuestion() {
+  game.locked = false;
+  const type = nextType();
+  const entry = pickEntry(type);
+  game.current = buildQuestion(type, entry);
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = game.current;
+  updateHUD();
+
+  $('npcAvatar').textContent = q.type === 1 ? '👩‍🏫' : q.type === 2 ? '🧑‍🏫' : '😵‍💫';
+  $('speakerName').textContent = q.speaker;
+  $('speechRomaji').textContent = q.speechSub || '';
+  typeText($('speechText'), q.speech);
+
+  $('qInstruction').textContent = q.question;
+
+  const body = $('qBody');
+  body.innerHTML = '';
+
+  if (q.type === 3) renderScramble(q);
+  else renderChoices(q);
+}
+
+function renderChoices(q) {
+  const wrap = document.createElement('div');
+  wrap.className = 'options';
+  q.options.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.textContent = opt;
+    b.addEventListener('click', () => onChoice(b, opt, q));
+    wrap.appendChild(b);
+  });
+  $('qBody').appendChild(wrap);
+}
+
+/* ✅ REVISI: tombol chunk DIPINDAHKAN antar container (bukan dihapus &
+   dibuat ulang). Dengan begitu tombol "Reset" dapat mengembalikan semua
+   chunk ke pool, dan referensi tombol tetap utuh. */
+function renderScramble(q) {
+  const wrap = document.createElement('div');
+  wrap.className = 'scramble';
+
+  const lbl1 = document.createElement('div');
+  lbl1.className = 'slot-label';
+  lbl1.textContent = 'SUSUNANMU';
+
+  const answerRow = document.createElement('div');
+  answerRow.className = 'answer-row';
+
+  const lbl2 = document.createElement('div');
+  lbl2.className = 'slot-label';
+  lbl2.textContent = 'KATA TERSEDIA';
+
+  const pool = document.createElement('div');
+  pool.className = 'chunk-pool';
+
+  const actions = document.createElement('div');
+  actions.className = 'scramble-actions';
+
+  const btnReset = document.createElement('button');
+  btnReset.className = 'btn ghost small';
+  btnReset.textContent = '↺ Reset';
+
+  const btnCheck = document.createElement('button');
+  btnCheck.className = 'btn primary small';
+  btnCheck.textContent = '✓ Periksa';
+  btnCheck.disabled = true;
+  btnCheck.style.opacity = '.45';
+
+  function updateCheck() {
+    const full = answerRow.children.length === q.chunks.length;
+    btnCheck.disabled = !full;
+    btnCheck.style.opacity = full ? '1' : '.45';
+  }
+
+  q.chunks.forEach((chunkText, idx) => {
+    const b = document.createElement('button');
+    b.className = 'chunk';
+    b.textContent = chunkText;
+    b.dataset.idx = idx;
+
+    // Satu handler untuk memindahkan tombol antar container (pool ⇄ answerRow)
+    b.addEventListener('click', () => {
+      if (game.locked) return;
+      if (b.parentElement === pool) {
+        b.classList.add('placed');
+        answerRow.appendChild(b);
+      } else {
+        b.classList.remove('placed');
+        pool.appendChild(b);
+      }
+      updateCheck();
+    });
+
+    pool.appendChild(b);
+  });
+
+  // Reset: kembalikan semua tombol dari answerRow ke pool
+  btnReset.addEventListener('click', () => {
+    if (game.locked) return;
+    [...answerRow.children].forEach(el => {
+      el.classList.remove('placed');
+      pool.appendChild(el);
+    });
+    updateCheck();
+  });
+
+  btnCheck.addEventListener('click', () => {
+    if (game.locked || btnCheck.disabled) return;
+    const userAnswer = [...answerRow.children]
+      .map(el => el.textContent)
+      .join(' ');
+    onChoice(null, userAnswer, q);
+  });
+
+  wrap.appendChild(lbl1);
+  wrap.appendChild(answerRow);
+  wrap.appendChild(lbl2);
+  wrap.appendChild(pool);
+  actions.appendChild(btnReset);
+  actions.appendChild(btnCheck);
+  wrap.appendChild(actions);
+  $('qBody').appendChild(wrap);
+}
+
+/* ---------- Menangani jawaban ---------- */
+function onChoice(btnEl, userAnswer, q) {
+  if (game.locked) return;
+  game.locked = true;
+
+  const isCorrect = userAnswer === q.answer;
+
+  // Kunci semua interaksi
+  document.querySelectorAll('#qBody .opt, #qBody .chunk, #qBody .btn').forEach(el => {
+    el.disabled = true;
+    el.style.pointerEvents = 'none';
+  });
+
+  if (q.type !== 3) {
+    document.querySelectorAll('#qBody .opt').forEach(b => {
+      if (b.textContent === q.answer) b.classList.add('correct');
+    });
+    if (!isCorrect && btnEl) btnEl.classList.add('wrong');
+  } else {
+    const row = document.querySelector('#qBody .answer-row');
+    if (row) {
+      row.style.borderColor = isCorrect ? '#3fe08c' : '#ff5f7e';
+      row.style.boxShadow = isCorrect
+        ? '0 0 20px rgba(63,224,140,.35)'
+        : '0 0 20px rgba(255,95,126,.35)';
+    }
+  }
+
+  applyResult(isCorrect, userAnswer, q);
+}
+
+function applyResult(isCorrect, userAnswer, q) {
+  let popIdx = -1;
+
+  if (isCorrect) {
+    game.correct++;
+    game.streak++;
+    if (game.streak > game.bestStreak) game.bestStreak = game.streak;
+
+    // Bonus nyawa tiap 5 streak
+    if (game.streak % STREAK_BONUS === 0) {
+      if (game.lives < MAX_LIVES) {
+        game.lives++;
+        popIdx = game.lives - 1;
+        showToast(`❤ +1 NYAWA!  Streak ${game.streak}`);
+      } else {
+        showToast(`🔥 Streak ${game.streak}! (Nyawa sudah penuh)`);
+      }
+    }
+  } else {
+    game.wrong++;
+    game.streak = 0;
+    game.lives--;
+
+    game.wrongLog.push({
+      type: q.type,
+      question: q.review.q,
+      correct: q.review.correct,
+      playerAnswer: userAnswer,
+      explain: q.review.explain
+    });
+  }
+
+  updateHUD(popIdx);
+
+  const delay = isCorrect ? 950 : 1900;
+
+  setTimeout(() => {
+    if (game.lives <= 0) { endGame(false); return; }
+    if (game.correct >= TARGET_CORRECT) { endGame(true); return; }
+    nextQuestion();
+  }, delay);
+}
+
+/* ---------- Mulai / Akhiri ---------- */
+function startGame(name) {
+  game.name = name;
+  game.lives = MAX_LIVES;
+  game.correct = 0;
+  game.wrong = 0;
+  game.streak = 0;
+  game.bestStreak = 0;
+  game.locked = false;
+  game.current = null;
+  game.wrongLog = [];
+  game.typeQueue = [];
+  game.used = { 1: new Set(), 2: new Set(), 3: new Set() };
+
+  showScreen('screen-game');
+  updateHUD();
+  setTimeout(() => nextQuestion(), 260);
+}
+
+function computeScore() {
+  return Math.max(0, game.correct * 100 + game.lives * 50 - game.wrong * 25);
+}
+
+function endGame(won) {
+  game.locked = true;
+
+  const score = computeScore();
+
+  // Simpan ke database (JSON di localStorage)
+  addRecord({
+    name: game.name || 'Anonim',
+    score,
+    won,
+    correct: game.correct,
+    wrong: game.wrong,
+    bestStreak: game.bestStreak,
+    lives: game.lives,
+    date: new Date().toISOString()
+  });
+
+  renderResult(won, score);
+  showScreen('screen-result');
+}
+
+function renderResult(won, score) {
+  const title = $('resultTitle');
+  title.textContent = won ? '🎉 KAMU MENANG!' : '💀 GAME OVER';
+  title.className = 'result-title ' + (won ? 'win' : 'lose');
+
+  $('resultSub').textContent = won
+    ? `Hebat, ${game.name}! Kamu menjawab ${TARGET_CORRECT} pertanyaan dengan benar.`
+    : `Nyawamu habis, ${game.name}. Jangan menyerah, coba lagi ya!`;
+
+  $('resultScore').textContent = score;
+  $('statCorrect').textContent = game.correct;
+  $('statWrong').textContent = game.wrong;
+  $('statStreak').textContent = game.bestStreak;
+  $('statLives').textContent = Math.max(0, game.lives);
+
+  const list = $('reviewList');
+  list.innerHTML = '';
+
+  if (game.wrongLog.length === 0) {
+    $('reviewTitle').textContent = '📘 MATERI PEMBAHASAN';
+    const empty = document.createElement('div');
+    empty.className = 'review-empty';
+    empty.textContent = '✨ Sempurna! Tidak ada soal yang kamu jawab salah.';
+    list.appendChild(empty);
+    return;
+  }
+
+  $('reviewTitle').textContent = `📘 MATERI PEMBAHASAN (${game.wrongLog.length} soal salah)`;
+
+  const typeLabel = { 1: 'Salam', 2: 'Partikel', 3: 'Menyusun Kalimat' };
+
+  game.wrongLog.forEach((w, i) => {
+    const div = document.createElement('div');
+    div.className = 'review-item';
+
+    const q = document.createElement('div');
+    q.className = 'q';
+    q.textContent = `${i + 1}. [${typeLabel[w.type]}] ${w.question}`;
+
+    const rowBad = document.createElement('div');
+    rowBad.className = 'row bad';
+    rowBad.innerHTML = `Jawabanmu: <b>${escapeHtml(w.playerAnswer)}</b>`;
+
+    const rowGood = document.createElement('div');
+    rowGood.className = 'row';
+    rowGood.innerHTML = `Jawaban benar: <b>${escapeHtml(w.correct)}</b>`;
+
+    const exp = document.createElement('div');
+    exp.className = 'exp';
+    exp.textContent = w.explain;
+
+    div.appendChild(q);
+    div.appendChild(rowBad);
+    div.appendChild(rowGood);
+    div.appendChild(exp);
+    list.appendChild(div);
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+/* =======================================================================
+   6. HALL OF FAME
+   ======================================================================= */
+function renderFame() {
+  const list = loadHoF();
+  const container = $('fameList');
+  container.innerHTML = '';
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="empty-fame">
+        <span class="big">🏆</span>
+        Belum ada data pemain.<br>Jadilah yang pertama masuk Hall of Fame!
+      </div>`;
+    return;
+  }
+
+  list.slice(0, 50).forEach((rec, i) => {
+    const item = document.createElement('div');
+    item.className = 'fame-item' + (i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '');
+
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+    const d = new Date(rec.date);
+    const dateStr = isNaN(d.getTime()) ? '-' :
+      d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    item.innerHTML = `
+      <div class="rank">${medal}</div>
+      <div class="fame-info">
+        <div class="fame-name">${escapeHtml(rec.name)}</div>
+        <div class="fame-meta">
+          <span class="badge ${rec.won ? 'win' : 'lose'}">${rec.won ? 'MENANG' : 'GAGAL'}</span>
+          <span>✓ ${rec.correct} · ✗ ${rec.wrong}</span>
+          <span>🔥 ${rec.bestStreak || 0}</span>
+          <span>${dateStr}</span>
+        </div>
+      </div>
+      <div class="fame-score">${rec.score}<small>SKOR</small></div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+/* =======================================================================
+   7. EVENT LISTENER
+   ======================================================================= */
+$('btnStart').addEventListener('click', () => {
+  $('inputName').value = '';
+  showScreen('screen-name');
+  setTimeout(() => $('inputName').focus(), 350);
+});
+
+$('btnFame').addEventListener('click', () => {
+  renderFame();
+  showScreen('screen-fame');
+});
+
+$('btnNameBack').addEventListener('click', () => showScreen('screen-menu'));
+
+$('btnNameGo').addEventListener('click', () => {
+  const name = $('inputName').value.trim();
+  if (!name) {
+    $('inputName').style.borderColor = '#ff5f7e';
+    $('inputName').placeholder = 'Nama tidak boleh kosong!';
+    setTimeout(() => {
+      $('inputName').style.borderColor = '';
+      $('inputName').placeholder = 'Ketik namamu di sini…';
+    }, 1400);
+    return;
+  }
+  startGame(name);
+});
+
+$('inputName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') $('btnNameGo').click();
+});
+
+$('btnQuit').addEventListener('click', () => {
+  if (confirm('Keluar dari permainan? Progres saat ini akan hilang.')) {
+    game.locked = true;
+    clearInterval(typeTimer);
+    showScreen('screen-menu');
+  }
+});
+
+$('btnPlayAgain').addEventListener('click', () => {
+  startGame(game.name || 'Pemain');
+});
+
+$('btnResultMenu').addEventListener('click', () => showScreen('screen-menu'));
+
+$('btnResultFame').addEventListener('click', () => {
+  renderFame();
+  showScreen('screen-fame');
+});
+
+$('btnFameBack').addEventListener('click', () => showScreen('screen-menu'));
+
+$('btnFameClear').addEventListener('click', () => {
+  if (confirm('Hapus SEMUA data Hall of Fame? Tindakan ini tidak bisa dibatalkan.')) {
+    saveHoF([]);
+    renderFame();
+  }
+});
+
+/* Cegah zoom ganda pada iOS */
+document.addEventListener('gesturestart', e => e.preventDefault());
+
+/* Inisialisasi awal */
+updateHUD();
+</script>
+</body>
+</html>
