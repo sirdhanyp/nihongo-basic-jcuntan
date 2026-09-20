@@ -4,955 +4,882 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#070b1a">
-<title>Ikimasho! — Belajar Hiragana &amp; Katakana</title>
+<title>Nihongo by Danz-Sensei — Edukasi Bahasa Jepang</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
   body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-    background:#070b1a;color:#e8ecff;overflow:hidden;
+    font-family:'Segoe UI',system-ui,-apple-system,"Helvetica Neue","Hiragino Sans","Yu Gothic",sans-serif;
+    background:#070b1a;color:#eaeaff;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
   }
-  #bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;}
+
+  #bg{
+    position:fixed;inset:0;width:100%;height:100%;
+    z-index:0;display:block;
+  }
 
   #app{
-    position:relative;z-index:1;height:100vh;height:100dvh;
-    display:flex;justify-content:center;overflow:hidden;
+    position:relative;z-index:1;
+    max-width:520px;
+    margin:0 auto;
+    padding:24px 18px calc(32px + env(safe-area-inset-bottom));
+    min-height:100vh;
+    display:flex;flex-direction:column;
   }
 
-  .screen{
-    display:none;flex-direction:column;width:100%;max-width:480px;height:100%;
-    overflow-y:auto;-webkit-overflow-scrolling:touch;
-    padding:16px 16px calc(16px + env(safe-area-inset-bottom));
+  /* ================= HERO ================= */
+  .hero{
+    text-align:center;
+    padding:12px 0 22px;
+    animation:fadeDown .6s ease;
   }
-  .screen.active{display:flex;}
+  @keyframes fadeDown{
+    from{opacity:0;transform:translateY(-16px);}
+    to{opacity:1;transform:translateY(0);}
+  }
 
-  /* ---------- MENU ---------- */
-  .menu-wrap{margin:auto 0;text-align:center;}
-  .logo-jp{
-    font-size:44px;font-weight:800;letter-spacing:2px;
-    background:linear-gradient(135deg,#ff4d6d,#4dd4ff);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    font-family:"Hiragino Sans","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif;
+  .hero-badge{
+    display:inline-block;
+    font-size:11px;
+    letter-spacing:3px;
+    font-weight:800;
+    color:#8fd8ff;
+    background:rgba(77,226,255,.1);
+    border:1px solid rgba(77,226,255,.3);
+    padding:6px 14px;
+    border-radius:20px;
+    margin-bottom:14px;
+    text-shadow:0 0 14px rgba(77,226,255,.6);
   }
-  .logo-title{font-size:30px;font-weight:900;letter-spacing:6px;margin-top:4px;}
-  .logo-sub{color:#8f9bc9;font-size:13px;margin-top:10px;line-height:1.6;padding:0 10px;}
-  .menu-buttons{margin-top:38px;display:flex;flex-direction:column;gap:12px;}
-  .hint{margin-top:22px;color:#5f6a94;font-size:12px;letter-spacing:.4px;}
 
-  /* ---------- BUTTONS ---------- */
-  .btn{
-    width:100%;padding:15px 18px;border-radius:14px;border:none;
-    font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;
-    transition:transform .12s ease,opacity .12s ease;color:#fff;
+  .hero-flag{
+    font-size:46px;
+    display:inline-block;
+    animation:floatFlag 3.4s ease-in-out infinite;
+    filter:drop-shadow(0 0 20px rgba(255,122,184,.55));
   }
-  .btn:active{transform:scale(.97);}
-  .btn-primary{
-    background:linear-gradient(135deg,#ff4d6d,#ff8a5c);
-    box-shadow:0 8px 24px rgba(255,77,109,.32);
+  @keyframes floatFlag{
+    0%,100%{transform:translateY(0) rotate(-2deg);}
+    50%{transform:translateY(-9px) rotate(2deg);}
   }
-  .btn-ghost{
-    background:rgba(255,255,255,.06);color:#e8ecff;
-    border:1px solid rgba(120,140,255,.22);
-  }
-  .btn-ghost.danger{color:#ff8fa3;border-color:rgba(255,84,112,.3);}
-  .btn + .btn{margin-top:10px;}
 
-  /* ---------- CARD ---------- */
-  .card{
-    margin:auto 0;background:rgba(20,26,54,.82);border:1px solid rgba(120,140,255,.22);
-    border-radius:20px;padding:22px;backdrop-filter:blur(12px);
+  .hero-jp{
+    font-size:20px;
+    letter-spacing:8px;
+    color:#ff8cc0;
+    margin-top:6px;
+    font-weight:700;
+    text-shadow:0 0 18px rgba(255,122,184,.6);
+  }
+
+  .hero-title{
+    font-size:38px;
+    font-weight:900;
+    letter-spacing:.5px;
+    line-height:1.05;
+    margin-top:4px;
+    background:linear-gradient(120deg,#ff7ab8 0%,#a06bff 45%,#4de2ff 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 8px 26px rgba(160,107,255,.5));
+  }
+
+  .hero-title .small{
+    display:block;
+    font-size:15px;
+    letter-spacing:6px;
+    font-weight:700;
+    margin-top:6px;
+    background:linear-gradient(120deg,#ff7ab8,#a06bff,#4de2ff);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+
+  .hero-desc{
+    font-size:13px;
+    color:#a9b2d6;
+    line-height:1.7;
+    margin-top:14px;
+    max-width:360px;
+    margin-left:auto;margin-right:auto;
+    padding:0 6px;
+  }
+
+  /* ================= STAT STRIP ================= */
+  .stat-strip{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:9px;
+    margin:20px 0 22px;
+    animation:fadeUp .7s ease .15s backwards;
+  }
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(16px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  .stat-box{
+    background:rgba(20,26,54,.7);
+    border:1px solid rgba(120,140,255,.2);
+    border-radius:14px;
+    padding:12px 6px;
+    text-align:center;
+    backdrop-filter:blur(12px);
     -webkit-backdrop-filter:blur(12px);
   }
-  .card h2{font-size:20px;margin-bottom:8px;}
-  .card p{color:#8f9bc9;font-size:13.5px;line-height:1.6;margin-bottom:18px;}
-  input[type=text]{
-    width:100%;padding:14px 16px;border-radius:12px;
-    background:rgba(255,255,255,.06);border:1px solid rgba(120,140,255,.22);
-    color:#e8ecff;font-size:16px;font-family:inherit;outline:none;margin-bottom:16px;
+  .stat-box .v{
+    font-size:19px;font-weight:900;
+    background:linear-gradient(120deg,#ff8cc0,#a06bff);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
   }
-  input[type=text]:focus{border-color:#4dd4ff;box-shadow:0 0 0 3px rgba(77,212,255,.13);}
-  input::placeholder{color:#5f6a94;}
+  .stat-box .k{
+    font-size:9.5px;
+    letter-spacing:1.5px;
+    color:#8b93b8;
+    margin-top:3px;
+    font-weight:800;
+    text-transform:uppercase;
+  }
 
-  /* ---------- HUD ---------- */
-  .hud{
-    background:rgba(20,26,54,.82);border:1px solid rgba(120,140,255,.22);
-    border-radius:16px;padding:12px 14px;backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);flex-shrink:0;
+  /* ================= SECTION TITLE ================= */
+  .section-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:12px;
+    letter-spacing:2.5px;
+    font-weight:800;
+    color:#8fd8ff;
+    margin:6px 4px 14px;
+    text-transform:uppercase;
   }
-  .hud-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;}
-  .hud-name{font-weight:700;color:#c9d3ff;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .hud-step{color:#4dd4ff;font-weight:700;font-variant-numeric:tabular-nums;}
-  .progress-wrap{padding:0 9px;margin-top:12px;}
-  .progress{position:relative;height:9px;border-radius:99px;background:rgba(255,255,255,.09);}
-  .progress-fill{
-    height:100%;width:0%;border-radius:99px;
-    background:linear-gradient(90deg,#4dd4ff,#ff4d6d);
-    transition:width .35s cubic-bezier(.4,0,.2,1);
+  .section-title::after{
+    content:'';
+    flex:1;
+    height:1px;
+    background:linear-gradient(90deg,rgba(143,216,255,.5),transparent);
   }
-  .progress-mark{
-    position:absolute;top:-11px;left:0;font-size:19px;
-    transform:translateX(-50%);transition:left .35s cubic-bezier(.4,0,.2,1);
-    filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));
-  }
-  .hud-stats{display:flex;gap:8px;margin-top:12px;}
-  .pill{
-    font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:99px;
-    background:rgba(255,255,255,.06);border:1px solid rgba(120,140,255,.16);
-  }
-  .pill.ok b{color:#3ddc97;}
-  .pill.no b{color:#ff5470;}
 
-  /* ---------- QUESTION ---------- */
-  .qcard{
-    background:rgba(20,26,54,.82);border:1px solid rgba(120,140,255,.22);
-    border-radius:20px;padding:20px 16px;text-align:center;margin-top:14px;
-    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  /* ================= GAME CARDS ================= */
+  .games{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  .game-card{
+    position:relative;
+    display:block;
+    border-radius:20px;
+    padding:18px;
+    overflow:hidden;
+    background:rgba(20,26,54,.78);
+    border:1px solid rgba(120,140,255,.22);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    box-shadow:0 12px 40px rgba(0,0,0,.5);
+    text-decoration:none;
+    color:inherit;
+    transition:transform .2s ease, box-shadow .25s ease, border-color .25s ease;
+    animation:fadeUp .7s ease backwards;
+  }
+  .game-card:nth-child(1){animation-delay:.2s;}
+  .game-card:nth-child(2){animation-delay:.3s;}
+  .game-card:nth-child(3){animation-delay:.4s;}
+
+  .game-card:active{transform:scale(.98);}
+  .game-card:hover{border-color:rgba(160,107,255,.55);box-shadow:0 16px 46px rgba(160,107,255,.35);}
+
+  .game-card::before{
+    content:'';
+    position:absolute;
+    top:-60px;right:-60px;
+    width:200px;height:200px;
+    border-radius:50%;
+    opacity:.25;
+    filter:blur(40px);
+    pointer-events:none;
+  }
+  .game-card.pink::before{background:#ff5fa2;}
+  .game-card.cyan::before{background:#4de2ff;}
+  .game-card.violet::before{background:#a06bff;}
+
+  .card-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:12px;
+    position:relative;z-index:1;
+  }
+
+  .card-icon{
+    width:56px;height:56px;
     flex-shrink:0;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    font-weight:800;
+    box-shadow:0 6px 20px rgba(0,0,0,.4);
   }
-  .qtype{
-    display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:1.6px;
-    padding:5px 13px;border-radius:99px;margin-bottom:14px;
+  .game-card.pink .card-icon{
+    background:linear-gradient(135deg,rgba(255,95,162,.35),rgba(160,107,255,.18));
+    border:1px solid rgba(255,95,162,.45);
   }
-  .qtype.hiragana{background:rgba(255,77,109,.16);color:#ff8fa3;border:1px solid rgba(255,77,109,.34);}
-  .qtype.katakana{background:rgba(77,212,255,.14);color:#7fe0ff;border:1px solid rgba(77,212,255,.34);}
-  .qchar{
-    font-size:80px;font-weight:700;line-height:1.15;color:#fff;
-    font-family:"Hiragino Sans","Yu Gothic",Meiryo,"Noto Sans JP","MS Gothic",sans-serif;
-    text-shadow:0 0 34px rgba(120,160,255,.45);
-    word-break:break-all;
+  .game-card.cyan .card-icon{
+    background:linear-gradient(135deg,rgba(77,226,255,.32),rgba(160,107,255,.16));
+    border:1px solid rgba(77,226,255,.45);
   }
-  .qchar.latin{
-    font-size:54px;letter-spacing:2px;
-    font-family:"SF Mono",Menlo,Consolas,monospace;
-    color:#4dd4ff;
-  }
-  .qtext{margin-top:12px;font-size:13px;color:#8f9bc9;}
-
-  /* ---------- OPTIONS ---------- */
-  .options{
-    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto;padding-top:18px;
-  }
-  .opt{
-    padding:19px 8px;border-radius:15px;font-family:inherit;font-size:22px;font-weight:700;
-    background:rgba(255,255,255,.07);border:1px solid rgba(120,140,255,.22);
-    color:#e8ecff;cursor:pointer;transition:transform .1s,background .18s,border-color .18s;
-    font-family:"Hiragino Sans","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif;
-  }
-  .opt:active{transform:scale(.96);}
-  .opt.correct{background:rgba(61,220,151,.24);border-color:#3ddc97;color:#a8ffdc;}
-  .opt.wrong{background:rgba(255,84,112,.24);border-color:#ff5470;color:#ffb3c0;}
-  .opt.disabled{pointer-events:none;opacity:.75;}
-  .opt.correct.disabled{opacity:1;}
-
-  .game-note{
-    text-align:center;font-size:11px;color:#5f6a94;margin-top:14px;line-height:1.5;
+  .game-card.violet .card-icon{
+    background:linear-gradient(135deg,rgba(160,107,255,.35),rgba(255,95,162,.18));
+    border:1px solid rgba(160,107,255,.5);
   }
 
-  /* ---------- TOAST ---------- */
+  .card-meta{flex:1;min-width:0;}
+  .card-meta h3{
+    font-size:17px;
+    font-weight:800;
+    color:#fff;
+    letter-spacing:.3px;
+    line-height:1.2;
+  }
+  .card-meta .jp{
+    font-size:11.5px;
+    color:#8fd8ff;
+    letter-spacing:2px;
+    margin-top:3px;
+    font-weight:700;
+  }
+
+  .card-desc{
+    font-size:12.5px;
+    color:#a9b2d6;
+    line-height:1.65;
+    position:relative;z-index:1;
+    margin-bottom:14px;
+  }
+
+  .card-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:14px;
+    position:relative;z-index:1;
+  }
+  .tag{
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.6px;
+    padding:4px 9px;
+    border-radius:8px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    color:#c3cae6;
+  }
+  .game-card.pink .tag{border-color:rgba(255,95,162,.3);color:#ffb0c8;}
+  .game-card.cyan .tag{border-color:rgba(77,226,255,.3);color:#8fe4ff;}
+  .game-card.violet .tag{border-color:rgba(160,107,255,.32);color:#c9b0ff;}
+
+  .card-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    padding:13px 16px;
+    border-radius:13px;
+    font-size:14.5px;
+    font-weight:800;
+    letter-spacing:.6px;
+    border:none;
+    color:#fff;
+    cursor:pointer;
+    font-family:inherit;
+    transition:transform .14s ease,filter .2s ease;
+    position:relative;z-index:1;
+    text-decoration:none;
+  }
+  .card-btn:active{transform:scale(.97);}
+  .game-card.pink .card-btn{
+    background:linear-gradient(135deg,#ff5fa2,#a06bff);
+    box-shadow:0 8px 24px rgba(255,95,162,.42);
+  }
+  .game-card.cyan .card-btn{
+    background:linear-gradient(135deg,#4de2ff,#a06bff);
+    box-shadow:0 8px 24px rgba(77,226,255,.38);
+  }
+  .game-card.violet .card-btn{
+    background:linear-gradient(135deg,#a06bff,#ff5fa2);
+    box-shadow:0 8px 24px rgba(160,107,255,.42);
+  }
+  .card-btn .arrow{
+    transition:transform .2s ease;
+  }
+  .card-btn:hover .arrow{transform:translateX(3px);}
+
+  /* ================= FOOTER ================= */
+  .footer{
+    margin-top:28px;
+    text-align:center;
+    font-size:11px;
+    color:#5f6a94;
+    line-height:1.8;
+    letter-spacing:.4px;
+  }
+  .footer .heart{color:#ff5f8f;}
+  .footer-actions{
+    display:flex;
+    gap:9px;
+    margin-top:14px;
+  }
+  .footer-actions button{
+    flex:1;
+    padding:11px 12px;
+    border-radius:12px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(120,140,255,.22);
+    color:#c3cae6;
+    font-size:12px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    letter-spacing:.5px;
+    transition:transform .14s ease,background .2s;
+  }
+  .footer-actions button:active{transform:scale(.96);}
+  .footer-actions button:hover{background:rgba(255,255,255,.1);}
+  .footer-actions button.danger{color:#ff8fa3;border-color:rgba(255,84,112,.35);}
+
+  /* ================= TOAST ================= */
   .toast{
-    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);
-    padding:12px 20px;border-radius:12px;font-size:13.5px;font-weight:700;
-    opacity:0;pointer-events:none;transition:.25s ease;z-index:60;
-    max-width:88vw;text-align:center;line-height:1.4;
+    position:fixed;
+    left:50%;
+    bottom:26px;
+    transform:translateX(-50%) translateY(20px);
+    padding:11px 22px;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:800;
+    letter-spacing:.5px;
+    color:#fff;
+    background:linear-gradient(135deg,#a06bff,#4de2ff);
+    box-shadow:0 12px 36px rgba(160,107,255,.55);
+    opacity:0;
+    pointer-events:none;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    z-index:80;
+    max-width:88vw;
+    text-align:center;
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-  .toast.ok{background:rgba(61,220,151,.96);color:#04231a;}
-  .toast.no{background:rgba(255,84,112,.96);color:#2b0009;}
 
-  /* ---------- INTRO ---------- */
-  .intro{
-    position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:6px;
-    background:rgba(7,11,26,.95);opacity:0;pointer-events:none;transition:opacity .35s;
+  /* ================= SPLASH ================= */
+  .splash{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:radial-gradient(circle at 50% 40%,#150b28,#05060f 70%);
+    transition:opacity .55s ease, visibility .55s;
   }
-  .intro.show{opacity:1;}
-  .intro-jp{
-    font-size:46px;font-weight:800;
-    font-family:"Hiragino Sans","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif;
-    background:linear-gradient(135deg,#ff4d6d,#4dd4ff);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
+  .splash.hide{opacity:0;visibility:hidden;}
+  .splash-jp{
+    font-size:52px;
+    font-weight:900;
+    letter-spacing:4px;
+    background:linear-gradient(120deg,#ff7ab8,#a06bff,#4de2ff);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+    animation:popIn .8s cubic-bezier(.34,1.56,.64,1);
   }
-  .intro-en{font-size:13px;letter-spacing:6px;color:#5f6a94;font-weight:700;}
-
-  /* ---------- RESULT ---------- */
-  .result-head{text-align:center;margin-top:8px;}
-  .result-icon{font-size:52px;line-height:1;}
-  .result-title{font-size:22px;font-weight:900;margin-top:10px;}
-  .result-sub{color:#8f9bc9;font-size:13px;margin-top:6px;line-height:1.6;}
-  .score-box{
-    margin:20px auto 0;width:132px;height:132px;border-radius:50%;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:radial-gradient(circle at 50% 30%,rgba(255,77,109,.28),rgba(77,212,255,.1));
-    border:2px solid rgba(255,77,109,.45);
-    box-shadow:0 0 44px rgba(255,77,109,.22);
+  @keyframes popIn{
+    0%{transform:scale(.6);opacity:0;}
+    100%{transform:scale(1);opacity:1;}
   }
-  .score-num{font-size:42px;font-weight:900;line-height:1;}
-  .score-label{font-size:10px;letter-spacing:3px;color:#8f9bc9;margin-top:6px;font-weight:700;}
-  .result-stats{display:flex;margin-top:20px;gap:8px;}
-  .result-stats > div{
-    flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(120,140,255,.18);
-    border-radius:13px;padding:11px 4px;text-align:center;
+  .splash-sub{
+    font-size:12px;
+    letter-spacing:6px;
+    color:#8fd8ff;
+    font-weight:700;
+    opacity:.8;
   }
-  .result-stats b{display:block;font-size:19px;}
-  .result-stats span{font-size:10.5px;color:#8f9bc9;}
-  .result-stats > div:nth-child(1) b{color:#3ddc97;}
-  .result-stats > div:nth-child(2) b{color:#ff5470;}
-  .result-stats > div:nth-child(3) b{color:#4dd4ff;}
-
-  .review{margin-top:22px;}
-  .review h3{font-size:15px;margin-bottom:4px;}
-  .review-note{font-size:11.5px;color:#8f9bc9;line-height:1.6;margin-bottom:12px;}
-  .review-list{display:flex;flex-direction:column;gap:9px;}
-  .rv{
-    display:flex;gap:12px;align-items:center;
-    background:rgba(255,255,255,.05);border:1px solid rgba(120,140,255,.18);
-    border-radius:14px;padding:11px 13px;
+  .splash-loader{
+    margin-top:24px;
+    width:130px;
+    height:3px;
+    border-radius:99px;
+    background:rgba(255,255,255,.1);
+    overflow:hidden;
   }
-  .rv-kana{
-    font-size:32px;font-weight:700;min-width:52px;text-align:center;color:#fff;
-    font-family:"Hiragino Sans","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif;
+  .splash-loader::after{
+    content:'';
+    display:block;
+    height:100%;
+    width:40%;
+    border-radius:99px;
+    background:linear-gradient(90deg,#ff7ab8,#4de2ff);
+    animation:loading 1.2s ease-in-out infinite;
   }
-  .rv-body{flex:1;min-width:0;}
-  .rv-type{font-size:9.5px;font-weight:800;letter-spacing:1.2px;margin-bottom:3px;}
-  .rv-type.hiragana{color:#ff8fa3;}
-  .rv-type.katakana{color:#7fe0ff;}
-  .rv-line{font-size:12.5px;color:#a9b4dd;line-height:1.55;}
-  .rv-line b{color:#e8ecff;}
-  .rv-line.miss b{color:#ff8fa3;}
-  .perfect{
-    background:rgba(61,220,151,.12);border:1px solid rgba(61,220,151,.35);
-    color:#a8ffdc;border-radius:14px;padding:15px;font-size:13px;text-align:center;font-weight:600;
+  @keyframes loading{
+    0%{transform:translateX(-100%);}
+    100%{transform:translateX(320%);}
   }
-
-  /* ---------- HALL ---------- */
-  .page-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-shrink:0;}
-  .page-head h2{font-size:19px;}
-  .icon-btn{
-    width:38px;height:38px;border-radius:11px;flex-shrink:0;
-    background:rgba(255,255,255,.06);border:1px solid rgba(120,140,255,.22);
-    color:#e8ecff;font-size:17px;cursor:pointer;font-family:inherit;
-  }
-  .icon-btn:active{transform:scale(.94);}
-  .hall-list{display:flex;flex-direction:column;gap:9px;flex:1;}
-  .hall-item{
-    display:flex;align-items:center;gap:12px;
-    background:rgba(20,26,54,.82);border:1px solid rgba(120,140,255,.22);
-    border-radius:14px;padding:12px 14px;
-  }
-  .hall-item.top1{border-color:rgba(255,196,0,.55);box-shadow:0 0 22px rgba(255,196,0,.12);}
-  .hall-item.top2{border-color:rgba(200,210,230,.45);}
-  .hall-item.top3{border-color:rgba(205,127,50,.5);}
-  .rank{font-size:17px;font-weight:900;min-width:28px;text-align:center;color:#5f6a94;}
-  .hall-body{flex:1;min-width:0;}
-  .hall-name{
-    font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  }
-  .hall-meta{font-size:11px;color:#8f9bc9;margin-top:3px;}
-  .hall-meta .ok{color:#3ddc97;}
-  .hall-meta .no{color:#ff5470;}
-  .hall-score{font-size:17px;font-weight:900;color:#ff8fa3;font-variant-numeric:tabular-nums;}
-  .empty{
-    text-align:center;color:#5f6a94;font-size:13px;padding:44px 16px;line-height:1.7;
-  }
-  .hall-actions{margin-top:16px;display:flex;gap:10px;flex-shrink:0;}
-  .hall-actions .btn{margin-top:0;font-size:13.5px;padding:13px 10px;}
 </style>
 </head>
 <body>
 
 <canvas id="bg"></canvas>
 
-<div id="app">
-
-  <!-- ================= MENU ================= -->
-  <section id="screen-menu" class="screen active">
-    <div class="menu-wrap">
-      <div class="logo-jp">いきましょ！</div>
-      <div class="logo-title">IKIMASHO</div>
-      <p class="logo-sub">Simulasi perjalanan menuju Jepang.<br>Kuasai Hiragana &amp; Katakana untuk sampai di garis finish!</p>
-      <div class="menu-buttons">
-        <button class="btn btn-primary" onclick="gotoName()">▶ Mulai Permainan</button>
-        <button class="btn btn-ghost" onclick="showHall()">🏆 Hall of Fame</button>
-      </div>
-      <p class="hint">30 langkah &nbsp;•&nbsp; 15 Hiragana &nbsp;•&nbsp; 15 Katakana</p>
-    </div>
-  </section>
-
-  <!-- ================= INPUT NAMA ================= -->
-  <section id="screen-name" class="screen">
-    <div class="card">
-      <h2>Perkenalkan Dirimu 🙇</h2>
-      <p>Masukkan namamu dulu ya. Namamu akan tercatat di Hall of Fame setelah perjalanan selesai.</p>
-      <input type="text" id="input-name" maxlength="16" placeholder="Nama pemain..." autocomplete="off">
-      <button class="btn btn-primary" id="btn-start">Mulai Perjalanan 🚀</button>
-      <button class="btn btn-ghost" onclick="showScreen('screen-menu')">Kembali</button>
-    </div>
-  </section>
-
-  <!-- ================= GAME ================= -->
-  <section id="screen-game" class="screen">
-    <div class="hud">
-      <div class="hud-top">
-        <span class="hud-name" id="hud-name">Pemain</span>
-        <span class="hud-step" id="hud-step">Langkah 0/30</span>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress">
-          <div class="progress-fill" id="progress-fill"></div>
-          <div class="progress-mark" id="progress-mark">🧳</div>
-        </div>
-      </div>
-      <div class="hud-stats">
-        <span class="pill ok">Benar <b id="stat-benar">0</b></span>
-        <span class="pill no">Salah <b id="stat-salah">0</b></span>
-      </div>
-    </div>
-
-    <div class="qcard">
-      <div class="qtype hiragana" id="q-type">HIRAGANA</div>
-      <div class="qchar" id="q-char">あ</div>
-      <div class="qtext" id="q-text">Huruf ini dibaca...</div>
-    </div>
-
-    <div class="options" id="options"></div>
-    <div class="game-note">Jawab benar untuk maju 1 langkah.<br>Salah = mundur 1 langkah. Salah di langkah 1 = perjalanan gagal!</div>
-  </section>
-
-  <!-- ================= HASIL ================= -->
-  <section id="screen-result" class="screen">
-    <div class="result-head">
-      <div class="result-icon" id="result-icon">🎌</div>
-      <div class="result-title" id="result-title">Selamat!</div>
-      <div class="result-sub" id="result-sub"></div>
-    </div>
-
-    <div class="score-box">
-      <div class="score-num" id="result-score">0</div>
-      <div class="score-label">SKOR</div>
-    </div>
-
-    <div class="result-stats">
-      <div><b id="result-benar">0</b><span>Benar</span></div>
-      <div><b id="result-salah">0</b><span>Salah</span></div>
-      <div><b id="result-step">0</b><span>Langkah</span></div>
-    </div>
-
-    <div class="review">
-      <h3>📚 Materi Pembelajaran</h3>
-      <div class="review-note">
-        Hiragana dipakai untuk kata asli Jepang, Katakana untuk kata serapan asing.
-        Pelajari kembali huruf-huruf berikut agar perjalananmu berikutnya lancar!
-      </div>
-      <div class="review-list" id="review-list"></div>
-    </div>
-
-    <div style="margin-top:20px;">
-      <button class="btn btn-primary" onclick="playAgain()">🔄 Main Lagi</button>
-      <button class="btn btn-ghost" onclick="showHall()">🏆 Hall of Fame</button>
-      <button class="btn btn-ghost" onclick="showScreen('screen-menu')">🏠 Menu Utama</button>
-    </div>
-  </section>
-
-  <!-- ================= HALL OF FAME ================= -->
-  <section id="screen-hall" class="screen">
-    <div class="page-head">
-      <button class="icon-btn" onclick="showScreen('screen-menu')">←</button>
-      <h2>🏆 Hall of Fame</h2>
-    </div>
-    <div class="hall-list" id="hall-list"></div>
-    <div class="hall-actions">
-      <button class="btn btn-ghost" onclick="exportJSON()">⬇ Unduh JSON</button>
-      <button class="btn btn-ghost danger" onclick="clearHall()">🗑 Hapus Semua</button>
-    </div>
-  </section>
-
+<!-- SPLASH -->
+<div class="splash" id="splash">
+  <div class="splash-jp">日本語</div>
+  <div class="splash-sub">NIHONGO</div>
+  <div class="splash-loader"></div>
 </div>
 
-<!-- INTRO OVERLAY -->
-<div class="intro" id="intro">
-  <div class="intro-jp">いきましょ！</div>
-  <div class="intro-en">IKIMASHO</div>
+<div id="app">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <div class="hero-badge">EDUKASI BAHASA JEPANG</div>
+    <div>
+      <span class="hero-flag">🇯🇵</span>
+    </div>
+    <div class="hero-jp">にほんご</div>
+    <h1 class="hero-title">
+      Nihongo
+      <span class="small">by Danz-Sensei</span>
+    </h1>
+    <p class="hero-desc">
+      Kumpulan mini-game interaktif untuk belajar kosakata, huruf kana,
+      dan percakapan dasar bahasa Jepang. Pilih salah satu modul di bawah
+      dan mulai petualanganmu!
+    </p>
+  </header>
+
+  <!-- ================= STATS ================= -->
+  <section class="stat-strip">
+    <div class="stat-box">
+      <div class="v" id="stat-plays">0</div>
+      <div class="k">Sesi Bermain</div>
+    </div>
+    <div class="stat-box">
+      <div class="v" id="stat-modules">3</div>
+      <div class="k">Modul Game</div>
+    </div>
+    <div class="stat-box">
+      <div class="v" id="stat-last">—</div>
+      <div class="k">Terakhir Main</div>
+    </div>
+  </section>
+
+  <!-- ================= GAME LIST ================= -->
+  <div class="section-title">🎮 Pilih Modul Permainan</div>
+
+  <section class="games">
+
+    <!-- CARD 1 : HIRAGANA & KATAKANA -->
+    <article class="game-card pink">
+      <div class="card-head">
+        <div class="card-icon">あ</div>
+        <div class="card-meta">
+          <h3>Ikimasho! — Kana Journey</h3>
+          <div class="jp">ひらがな・カタカナ</div>
+        </div>
+      </div>
+      <p class="card-desc">
+        Kuasai <b>Hiragana</b> dan <b>Katakana</b> dalam perjalanan 30 langkah menuju Jepang.
+        Jawab benar untuk maju, salah untuk mundur. Sampai di garis finish dan masuk Hall of Fame!
+      </p>
+      <div class="card-tags">
+        <span class="tag">HIRAGANA</span>
+        <span class="tag">KATAKANA</span>
+        <span class="tag">30 LANGKAH</span>
+        <span class="tag">PROGRESS BAR</span>
+      </div>
+      <a class="card-btn" href="hirakatamainpage.html">
+        <span>▶ Mulai Belajar Kana</span>
+        <span class="arrow">→</span>
+      </a>
+    </article>
+
+    <!-- CARD 2 : KOSAKATA -->
+    <article class="game-card cyan">
+      <div class="card-head">
+        <div class="card-icon">犬</div>
+        <div class="card-meta">
+          <h3>日本語クイズ — Kosakata</h3>
+          <div class="jp">たんご クイズ</div>
+        </div>
+      </div>
+      <p class="card-desc">
+        Tebak arti dari <b>100 kosakata benda</b> bahasa Jepang melalui gambar emoji.
+        Selesaikan 20 jawaban benar dengan 3 nyawa. Setiap 10 streak dapat bonus nyawa!
+      </p>
+      <div class="card-tags">
+        <span class="tag">100 KOSAKATA</span>
+        <span class="tag">20 TARGET</span>
+        <span class="tag">STREAK BONUS</span>
+        <span class="tag">REVIEW MATERI</span>
+      </div>
+      <a class="card-btn" href="goimainpage.html">
+        <span>▶ Mulai Kuis Kosakata</span>
+        <span class="arrow">→</span>
+      </a>
+    </article>
+
+    <!-- CARD 3 : KAIWA -->
+    <article class="game-card violet">
+      <div class="card-head">
+        <div class="card-icon">話</div>
+        <div class="card-meta">
+          <h3>Nihongo Talk — Kaiwa</h3>
+          <div class="jp">にほんご かいわ</div>
+        </div>
+      </div>
+      <p class="card-desc">
+        Visual novel edukasi bersama <b>Aoi-sensei</b>. Pelajari salam, partikel,
+        dan susun kalimat percakapan dasar. 15 jawaban benar dengan 5 nyawa!
+      </p>
+      <div class="card-tags">
+        <span class="tag">VISUAL NOVEL</span>
+        <span class="tag">50 PERCAKAPAN</span>
+        <span class="tag">PARTIKEL</span>
+        <span class="tag">SCRAMBLE</span>
+      </div>
+      <a class="card-btn" href="kaiwamainpage.html">
+        <span>▶ Mulai Percakapan</span>
+        <span class="arrow">→</span>
+      </a>
+    </article>
+
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="footer">
+    <div class="footer-actions">
+      <button id="btn-export">⬇ Unduh Statistik JSON</button>
+      <button id="btn-reset" class="danger">🗑 Reset Data</button>
+    </div>
+    <div style="margin-top:16px;">
+      Dibuat dengan <span class="heart">♥</span> untuk pembelajar bahasa Jepang<br>
+      © Nihongo by Danz-Sensei · WebGL + Local JSON Storage
+    </div>
+  </footer>
+
 </div>
 
 <div class="toast" id="toast"></div>
 
+<!-- Three.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
 <script>
-/* =========================================================
-   1. DATA HURUF
-   ========================================================= */
-const HIRAGANA = [
-  ['あ','a'],['い','i'],['う','u'],['え','e'],['お','o'],
-  ['か','ka'],['き','ki'],['く','ku'],['け','ke'],['こ','ko'],
-  ['さ','sa'],['し','shi'],['す','su'],['せ','se'],['そ','so'],
-  ['た','ta'],['ち','chi'],['つ','tsu'],['て','te'],['と','to'],
-  ['な','na'],['に','ni'],['ぬ','nu'],['ね','ne'],['の','no'],
-  ['は','ha'],['ひ','hi'],['ふ','fu'],['へ','he'],['ほ','ho'],
-  ['ま','ma'],['み','mi'],['む','mu'],['め','me'],['も','mo'],
-  ['や','ya'],['ゆ','yu'],['よ','yo'],
-  ['ら','ra'],['り','ri'],['る','ru'],['れ','re'],['ろ','ro'],
-  ['わ','wa'],['を','wo'],['ん','n']
-];
-
-const KATAKANA = [
-  ['ア','a'],['イ','i'],['ウ','u'],['エ','e'],['オ','o'],
-  ['カ','ka'],['キ','ki'],['ク','ku'],['ケ','ke'],['コ','ko'],
-  ['サ','sa'],['シ','shi'],['ス','su'],['セ','se'],['ソ','so'],
-  ['タ','ta'],['チ','chi'],['ツ','tsu'],['テ','te'],['ト','to'],
-  ['ナ','na'],['ニ','ni'],['ヌ','nu'],['ネ','ne'],['ノ','no'],
-  ['ハ','ha'],['ヒ','hi'],['フ','fu'],['ヘ','he'],['ホ','ho'],
-  ['マ','ma'],['ミ','mi'],['ム','mu'],['メ','me'],['モ','mo'],
-  ['ヤ','ya'],['ユ','yu'],['ヨ','yo'],
-  ['ラ','ra'],['リ','ri'],['ル','ru'],['レ','re'],['ロ','ro'],
-  ['ワ','wa'],['ヲ','wo'],['ン','n']
-];
-
-const TOTAL_STEPS  = 30;
-const STORAGE_KEY  = 'ikimasho_hall_of_fame_v1';
-
-/* =========================================================
-   2. UTILITAS
-   ========================================================= */
-function shuffle(arr){
-  for(let i = arr.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function esc(str){
-  return String(str).replace(/[&<>"']/g, c => (
-    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
-  ));
-}
-
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById(id);
-  el.classList.add('active');
-  el.scrollTop = 0;
-}
+/* ============================================================
+   1. UTILITAS
+   ============================================================ */
+const $ = id => document.getElementById(id);
 
 let toastTimer = null;
-function toast(msg, cls){
-  const t = document.getElementById('toast');
+function showToast(msg){
+  const t = $('toast');
   t.textContent = msg;
-  t.className = 'toast show ' + cls;
+  t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.className = 'toast ' + cls; }, 1500);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-/* =========================================================
-   3. STATE PERMAINAN
-   ========================================================= */
-let S = null;   // state aktif
+/* ============================================================
+   2. PENYIMPANAN JSON (localStorage)
+   ============================================================ */
+const STORE_KEY = 'nihongo_hub_stats_v1';
 
-function buildStepPlan(){
-  const plan = [];
-  for(let i = 0; i < TOTAL_STEPS / 2; i++) plan.push('hiragana');
-  for(let i = 0; i < TOTAL_STEPS / 2; i++) plan.push('katakana');
-  return shuffle(plan);
-}
-
-function makeQuestion(step){
-  const type = S.plan[step - 1];
-  const pool = (type === 'hiragana') ? HIRAGANA : KATAKANA;
-  const target = pool[Math.floor(Math.random() * pool.length)];
-  const kana = target[0];
-  const romaji = target[1];
-
-  const mode = Math.random() < 0.5 ? 'kana2romaji' : 'romaji2kana';
-  const others = shuffle(pool.filter(c => c[1] !== romaji)).slice(0, 3);
-  const set = shuffle([target, ...others]);
-
-  const options = set.map(c => ({
-    label: (mode === 'kana2romaji') ? c[1] : c[0],
-    value: (mode === 'kana2romaji') ? c[1] : c[0],
-    romaji: c[1]
-  }));
-
-  return {
-    step: step,
-    type: type,
-    mode: mode,
-    kana: kana,
-    romaji: romaji,
-    prompt: (mode === 'kana2romaji') ? kana : romaji,
-    promptLabel: (mode === 'kana2romaji')
-      ? 'Huruf ini dibaca...'
-      : 'Romaji ini adalah huruf...',
-    options: options,
-    answerValue: (mode === 'kana2romaji') ? romaji : kana
-  };
-}
-
-/* =========================================================
-   4. ALUR PERMAINAN
-   ========================================================= */
-function gotoName(){
-  document.getElementById('input-name').value = '';
-  showScreen('screen-name');
-  setTimeout(() => {
-    const inp = document.getElementById('input-name');
-    if (window.innerWidth > 480) inp.focus();
-  }, 250);
-}
-
-function startGame(name){
-  S = {
-    name: name,
-    pos: 0,
-    maxPos: 0,
-    correct: 0,
-    wrong: 0,
-    wrongList: [],
-    plan: buildStepPlan(),
-    current: null,
-    locked: true,
-    over: false
-  };
-  document.getElementById('stat-benar').textContent = '0';
-  document.getElementById('stat-salah').textContent = '0';
-  updateHUD();
-  showScreen('screen-game');
-
-  // Intro "IKIMASHO!"
-  const intro = document.getElementById('intro');
-  intro.classList.add('show');
-  setTimeout(() => {
-    intro.classList.remove('show');
-    S.locked = false;
-    nextQuestion();
-  }, 1400);
-}
-
-function nextQuestion(){
-  if(!S || S.over) return;
-  if(S.pos >= TOTAL_STEPS){ endGame(true); return; }
-  S.current = makeQuestion(S.pos + 1);
-  S.locked = false;
-  renderQuestion();
-}
-
-function renderQuestion(){
-  const q = S.current;
-  if(!q) return;
-
-  const typeEl = document.getElementById('q-type');
-  typeEl.textContent = q.type === 'hiragana' ? 'HIRAGANA' : 'KATAKANA';
-  typeEl.className = 'qtype ' + q.type;
-
-  const charEl = document.getElementById('q-char');
-  charEl.textContent = q.prompt;
-  charEl.classList.toggle('latin', q.mode === 'romaji2kana');
-
-  document.getElementById('q-text').textContent = q.promptLabel;
-
-  const wrap = document.getElementById('options');
-  wrap.innerHTML = '';
-  q.options.forEach(o => {
-    const b = document.createElement('button');
-    b.className = 'opt';
-    b.textContent = o.label;
-    b.dataset.value = o.value;
-    b.addEventListener('click', () => answer(b, o));
-    wrap.appendChild(b);
-  });
-
-  updateHUD();
-}
-
-function answer(btn, opt){
-  if(!S || S.locked || S.over) return;
-  S.locked = true;
-
-  const q = S.current;
-  const isCorrect = (opt.value === q.answerValue);
-
-  document.querySelectorAll('.opt').forEach(b => {
-    b.classList.add('disabled');
-    if(b.dataset.value === q.answerValue) b.classList.add('correct');
-  });
-  if(!isCorrect) btn.classList.add('wrong');
-
-  if(isCorrect){
-    S.correct++;
-    S.pos++;
-    if(S.pos > S.maxPos) S.maxPos = S.pos;
-    updateHUD();
-
-    if(S.pos >= TOTAL_STEPS){
-      toast('🎉 Sampai di Jepang!', 'ok');
-      setTimeout(() => endGame(true), 900);
-    }else{
-      toast('✅ Benar! Maju satu langkah.', 'ok');
-      setTimeout(() => nextQuestion(), 800);
-    }
-  }else{
-    S.wrong++;
-    S.wrongList.push({
-      kana: q.kana,
-      romaji: q.romaji,
-      type: q.type,
-      mode: q.mode,
-      chosenLabel: opt.label,
-      chosenRomaji: opt.romaji
-    });
-    updateHUD();
-
-    if(S.pos <= 1){
-      toast('❌ Salah! Perjalanan gagal...', 'no');
-      setTimeout(() => endGame(false), 1300);
-    }else{
-      S.pos--;
-      updateHUD();
-      toast('❌ Salah! Mundur satu langkah.', 'no');
-      setTimeout(() => nextQuestion(), 1300);
-    }
-  }
-}
-
-function updateHUD(){
-  if(!S) return;
-  document.getElementById('hud-name').textContent = '👤 ' + S.name;
-  document.getElementById('hud-step').textContent = 'Langkah ' + S.pos + '/' + TOTAL_STEPS;
-  const pct = (S.pos / TOTAL_STEPS) * 100;
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-mark').style.left = pct + '%';
-  document.getElementById('stat-benar').textContent = S.correct;
-  document.getElementById('stat-salah').textContent = S.wrong;
-}
-
-/* =========================================================
-   5. AKHIR PERMAINAN & HASIL
-   ========================================================= */
-function endGame(finished){
-  if(!S || S.over) return;
-  S.over = true;
-
-  const score = Math.max(0, S.correct * 10 - S.wrong * 5 + (finished ? 100 : 0));
-
-  const rec = {
-    id: Date.now(),
-    name: S.name,
-    score: score,
-    correct: S.correct,
-    wrong: S.wrong,
-    step: S.maxPos,
-    finished: finished,
-    date: new Date().toISOString()
-  };
-
-  saveRecord(rec);
-  renderResult(rec);
-  showScreen('screen-result');
-}
-
-function renderResult(rec){
-  const icon = document.getElementById('result-icon');
-  const title = document.getElementById('result-title');
-  const sub = document.getElementById('result-sub');
-
-  if(rec.finished){
-    icon.textContent = '🎌';
-    title.textContent = 'Selamat Sampai di Jepang!';
-    sub.textContent = rec.name + ', kamu berhasil menempuh 30 langkah menuju Jepang!';
-  }else{
-    icon.textContent = '💥';
-    title.textContent = 'Perjalanan Gagal';
-    const where = (rec.step === 0) ? 'soal pertama' : ('langkah ' + rec.step);
-    sub.textContent = rec.name + ', kamu terjatuh di ' + where + '. Ayo coba lagi!';
-  }
-
-  document.getElementById('result-score').textContent = rec.score;
-  document.getElementById('result-benar').textContent = rec.correct;
-  document.getElementById('result-salah').textContent = rec.wrong;
-  document.getElementById('result-step').textContent = rec.step;
-
-  renderReview();
-}
-
-function renderReview(){
-  const el = document.getElementById('review-list');
-  if(!S || S.wrongList.length === 0){
-    el.innerHTML = '<div class="perfect">✨ Sempurna! Tidak ada jawaban yang salah. 素晴らしい！</div>';
-    return;
-  }
-
-  // Unik per huruf
-  const seen = new Set();
-  const uniq = [];
-  S.wrongList.forEach(w => {
-    if(!seen.has(w.kana)){ seen.add(w.kana); uniq.push(w); }
-  });
-
-  el.innerHTML = uniq.map(w => {
-    const typeLabel = w.type === 'hiragana' ? 'HIRAGANA' : 'KATAKANA';
-    const showChosenRomaji = (w.chosenLabel !== w.chosenRomaji);
-    return '' +
-      '<div class="rv">' +
-        '<div class="rv-kana">' + esc(w.kana) + '</div>' +
-        '<div class="rv-body">' +
-          '<div class="rv-type ' + w.type + '">' + typeLabel + '</div>' +
-          '<div class="rv-line">Dibaca: <b>' + esc(w.romaji) + '</b></div>' +
-          '<div class="rv-line miss">Jawabanmu: <b>' + esc(w.chosenLabel) + '</b>' +
-            (showChosenRomaji ? ' (' + esc(w.chosenRomaji) + ')' : '') +
-          '</div>' +
-        '</div>' +
-      '</div>';
-  }).join('');
-}
-
-function playAgain(){
-  if(S) startGame(S.name);
-  else gotoName();
-}
-
-/* =========================================================
-   6. PENYIMPANAN JSON (localStorage)
-   ========================================================= */
-function loadRecords(){
+function loadStats(){
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const data = raw ? JSON.parse(raw) : [];
-    return Array.isArray(data) ? data : [];
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return { plays: 0, lastModule: null, lastPlayed: null, history: [] };
+    const data = JSON.parse(raw);
+    return {
+      plays: Number(data.plays) || 0,
+      lastModule: data.lastModule || null,
+      lastPlayed: data.lastPlayed || null,
+      history: Array.isArray(data.history) ? data.history : []
+    };
   }catch(e){
-    return [];
+    console.warn('Gagal membaca statistik:', e);
+    return { plays: 0, lastModule: null, lastPlayed: null, history: [] };
   }
 }
 
-function saveRecord(rec){
+function saveStats(stats){
   try{
-    const data = loadRecords();
-    data.push(rec);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORE_KEY, JSON.stringify(stats));
   }catch(e){
-    console.warn('Gagal menyimpan data:', e);
+    console.warn('Gagal menyimpan statistik:', e);
   }
 }
 
-/* =========================================================
-   7. HALL OF FAME
-   ========================================================= */
-function showHall(){
-  renderHall();
-  showScreen('screen-hall');
+function recordPlay(moduleName){
+  const stats = loadStats();
+  stats.plays += 1;
+  stats.lastModule = moduleName;
+  stats.lastPlayed = new Date().toISOString();
+  stats.history.push({ module: moduleName, date: stats.lastPlayed });
+  // batasi 100 riwayat terakhir
+  if(stats.history.length > 100) stats.history = stats.history.slice(-100);
+  saveStats(stats);
+  renderStats(stats);
 }
 
-function renderHall(){
-  const listEl = document.getElementById('hall-list');
-  const data = loadRecords();
-
-  if(data.length === 0){
-    listEl.innerHTML = '<div class="empty">Belum ada data pemain.<br>Jadilah yang pertama masuk Hall of Fame! 🌟</div>';
-    return;
-  }
-
-  data.sort((a, b) => (b.score - a.score) || (b.correct - a.correct) || (b.step - a.step));
-  const top = data.slice(0, 30);
-
-  listEl.innerHTML = top.map((r, i) => {
-    const rank = i + 1;
-    let rankIcon = '#' + rank;
-    let cls = '';
-    if(rank === 1){ rankIcon = '🥇'; cls = ' top1'; }
-    else if(rank === 2){ rankIcon = '🥈'; cls = ' top2'; }
-    else if(rank === 3){ rankIcon = '🥉'; cls = ' top3'; }
-
-    const statusTxt = r.finished ? '🎌 Finish' : '💥 Gagal';
-    const d = new Date(r.date);
-    const dateTxt = isNaN(d.getTime()) ? '' :
-      (' • ' + d.toLocaleDateString('id-ID', {day:'2-digit', month:'short'}));
-
-    return '' +
-      '<div class="hall-item' + cls + '">' +
-        '<div class="rank">' + rankIcon + '</div>' +
-        '<div class="hall-body">' +
-          '<div class="hall-name">' + esc(r.name) + '</div>' +
-          '<div class="hall-meta">' +
-            '<span class="ok">✓' + r.correct + '</span> ' +
-            '<span class="no">✗' + r.wrong + '</span> ' +
-            '• ' + statusTxt + ' • Langkah ' + r.step + dateTxt +
-          '</div>' +
-        '</div>' +
-        '<div class="hall-score">' + r.score + '</div>' +
-      '</div>';
-  }).join('');
+function formatRelativeDate(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return '—';
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMin = Math.floor(diffMs / 60000);
+  if(diffMin < 1) return 'BARU';
+  if(diffMin < 60) return diffMin + 'm';
+  const diffHr = Math.floor(diffMin / 60);
+  if(diffHr < 24) return diffHr + 'j';
+  const diffDay = Math.floor(diffHr / 24);
+  if(diffDay < 7) return diffDay + 'h';
+  return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short' });
 }
 
-function exportJSON(){
-  const data = loadRecords();
-  if(data.length === 0){ toast('Belum ada data untuk diunduh.', 'no'); return; }
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'ikimasho_hall_of_fame.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1500);
-  toast('📥 Data JSON diunduh.', 'ok');
+function renderStats(stats){
+  const s = stats || loadStats();
+  $('stat-plays').textContent = s.plays;
+  $('stat-last').textContent = formatRelativeDate(s.lastPlayed);
 }
 
-function clearHall(){
-  if(!confirm('Hapus semua data Hall of Fame? Tindakan ini tidak bisa dibatalkan.')) return;
-  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
-  renderHall();
-  toast('🗑 Semua data dihapus.', 'no');
-}
-
-/* =========================================================
-   8. BACKGROUND WEBGL (Three.js)
-   ========================================================= */
-let renderer = null, scene = null, camera = null;
-const sprites = [];
-let stars = null;
-let lastTime = performance.now();
-
-function makeKanaTexture(ch){
-  const c = document.createElement('canvas');
-  c.width = c.height = 128;
-  const ctx = c.getContext('2d');
-  ctx.clearRect(0, 0, 128, 128);
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 92px "Hiragino Sans","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(ch, 64, 70);
-  const tex = new THREE.CanvasTexture(c);
-  tex.minFilter = THREE.LinearFilter;
-  return tex;
-}
-
-function initBG(){
-  if(typeof THREE === 'undefined'){ return; }
-  const canvas = document.getElementById('bg');
+/* ============================================================
+   3. BACKGROUND WEBGL — Three.js
+   ============================================================ */
+(function initWebGL(){
+  if(typeof THREE === 'undefined') return;
+  const canvas = $('bg');
+  let renderer;
   try{
-    renderer = new THREE.WebGLRenderer({
-      canvas: canvas,
-      alpha: true,
-      antialias: false,
-      powerPreference: 'low-power'
-    });
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
   }catch(e){
     console.warn('WebGL tidak tersedia:', e);
     return;
   }
-
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x070b1a, 0.0115);
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x070b1a, 0.012);
 
-  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 300);
-  camera.position.z = 18;
+  const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 320);
+  camera.position.z = 20;
 
-  /* --- Bintang --- */
+  /* ---- Bintang latar ---- */
+  const starCount = 420;
   const starGeo = new THREE.BufferGeometry();
-  const starCount = 320;
-  const pos = new Float32Array(starCount * 3);
+  const starPos = new Float32Array(starCount * 3);
+  const starCol = new Float32Array(starCount * 3);
   for(let i = 0; i < starCount; i++){
-    pos[i * 3]     = (Math.random() - 0.5) * 140;
-    pos[i * 3 + 1] = (Math.random() - 0.5) * 140;
-    pos[i * 3 + 2] = -Math.random() * 180;
+    starPos[i * 3]     = (Math.random() - 0.5) * 160;
+    starPos[i * 3 + 1] = (Math.random() - 0.5) * 160;
+    starPos[i * 3 + 2] = -Math.random() * 200;
+    const c = new THREE.Color().setHSL(0.6 + Math.random() * 0.2, 0.7, 0.65 + Math.random() * 0.25);
+    starCol[i * 3]     = c.r;
+    starCol[i * 3 + 1] = c.g;
+    starCol[i * 3 + 2] = c.b;
   }
-  starGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  starGeo.setAttribute('color', new THREE.BufferAttribute(starCol, 3));
+
+  // Tekstur titik bercahaya
+  const tCanvas = document.createElement('canvas');
+  tCanvas.width = tCanvas.height = 64;
+  const tCtx = tCanvas.getContext('2d');
+  const grd = tCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grd.addColorStop(0, 'rgba(255,255,255,1)');
+  grd.addColorStop(0.4, 'rgba(255,255,255,0.55)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  tCtx.fillStyle = grd;
+  tCtx.fillRect(0, 0, 64, 64);
+  const dotTex = new THREE.CanvasTexture(tCanvas);
+
   const starMat = new THREE.PointsMaterial({
-    color: 0x8899ff, size: 0.42, transparent: true,
-    opacity: 0.72, sizeAttenuation: true, depthWrite: false
+    size: 0.7,
+    map: dotTex,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.85,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true
   });
-  stars = new THREE.Points(starGeo, starMat);
+  const stars = new THREE.Points(starGeo, starMat);
   scene.add(stars);
 
-  /* --- Sprite huruf kana --- */
-  const chars = 'あいうえおかきくけこさしすせそたちつてとアイウエオカキクケコサシスセソタチツテト';
-  for(let i = 0; i < 34; i++){
+  /* ---- Sprite karakter kana melayang ---- */
+  const chars = 'にほんごあいうえおかきくけこさしすせそたちつてとアイウエオカキクケコ';
+  function makeKanaTexture(ch){
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, 128, 128);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 92px "Hiragino Sans","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(ch, 64, 70);
+    const tex = new THREE.CanvasTexture(c);
+    tex.minFilter = THREE.LinearFilter;
+    return tex;
+  }
+
+  const sprites = [];
+  for(let i = 0; i < 26; i++){
     const tex = makeKanaTexture(chars[i % chars.length]);
     const mat = new THREE.SpriteMaterial({
       map: tex,
       transparent: true,
-      opacity: 0.13 + Math.random() * 0.17,
+      opacity: 0.10 + Math.random() * 0.14,
       depthWrite: false
     });
     const sp = new THREE.Sprite(mat);
     const scale = 3 + Math.random() * 4;
     sp.scale.set(scale, scale, 1);
     sp.position.set(
-      (Math.random() - 0.5) * 42,
-      (Math.random() - 0.5) * 62,
-      -Math.random() * 92
+      (Math.random() - 0.5) * 44,
+      (Math.random() - 0.5) * 66,
+      -Math.random() * 90
     );
     sp.userData = {
-      speed: 0.035 + Math.random() * 0.085,
+      speed: 0.03 + Math.random() * 0.09,
       phase: Math.random() * Math.PI * 2,
-      amp: 0.5 + Math.random() * 1.6,
+      amp: 0.5 + Math.random() * 1.8,
       baseX: sp.position.x
     };
     sprites.push(sp);
     scene.add(sp);
   }
 
-  window.addEventListener('resize', onResize);
-  requestAnimationFrame(animate);
-}
+  /* ---- Nebula sphere lembut ---- */
+  const nebGeo = new THREE.SphereGeometry(60, 32, 32);
+  const nebMat = new THREE.MeshBasicMaterial({
+    color: 0x2a1040,
+    transparent: true,
+    opacity: 0.18,
+    side: THREE.BackSide
+  });
+  const nebula = new THREE.Mesh(nebGeo, nebMat);
+  nebula.position.z = -80;
+  scene.add(nebula);
 
-function onResize(){
-  if(!renderer) return;
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
+  /* ---- Loop animasi ---- */
+  let lastTime = performance.now();
+  function animate(){
+    requestAnimationFrame(animate);
+    const now = performance.now();
+    const dt = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+    const t = now / 1000;
 
-function animate(){
-  requestAnimationFrame(animate);
-  if(!renderer) return;
-
-  const now = performance.now();
-  const dt = Math.min((now - lastTime) / 1000, 0.05);
-  lastTime = now;
-  const t = now / 1000;
-
-  for(let i = 0; i < sprites.length; i++){
-    const sp = sprites[i];
-    const u = sp.userData;
-    sp.position.z += u.speed * 60 * dt;
-    sp.position.x = u.baseX + Math.sin(t * 0.42 + u.phase) * u.amp;
-
-    if(sp.position.z > 26){
-      sp.position.z = -92;
-      sp.position.x = (Math.random() - 0.5) * 42;
-      u.baseX = sp.position.x;
+    for(let i = 0; i < sprites.length; i++){
+      const sp = sprites[i];
+      const u = sp.userData;
+      sp.position.z += u.speed * 60 * dt;
+      sp.position.x = u.baseX + Math.sin(t * 0.4 + u.phase) * u.amp;
+      if(sp.position.z > 26){
+        sp.position.z = -90;
+        sp.position.x = (Math.random() - 0.5) * 44;
+        u.baseX = sp.position.x;
+      }
     }
+
+    stars.rotation.z += dt * 0.01;
+    stars.rotation.x += dt * 0.004;
+    nebula.rotation.y += dt * 0.02;
+    nebula.rotation.x += dt * 0.008;
+
+    renderer.render(scene, camera);
   }
+  animate();
 
-  if(stars) stars.rotation.z += dt * 0.008;
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
 
-  renderer.render(scene, camera);
-}
+/* ============================================================
+   4. EVENT BINDING
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
 
-/* =========================================================
-   9. INISIALISASI
-   ========================================================= */
-(function init(){
-  // Enter pada input nama
-  const inp = document.getElementById('input-name');
-  inp.addEventListener('keydown', e => {
-    if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('btn-start').click(); }
+  // Sembunyikan splash setelah animasi
+  setTimeout(() => $('splash').classList.add('hide'), 900);
+
+  // Render statistik awal
+  renderStats();
+
+  // Catat kunjungan pada setiap kartu modul
+  const moduleMap = {
+    'hirakatamainpage.html': 'Ikimasho! (Hiragana & Katakana)',
+    'goimainpage.html': '日本語クイズ (Kosakata)',
+    'kaiwamainpage.html': 'Nihongo Talk (Kaiwa)'
+  };
+  document.querySelectorAll('.card-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const href = btn.getAttribute('href');
+      if(moduleMap[href]){
+        recordPlay(moduleMap[href]);
+      }
+    });
   });
 
-  document.getElementById('btn-start').addEventListener('click', () => {
-    const name = (inp.value || '').trim().slice(0, 16) || 'Pemain';
-    startGame(name);
+  // Ekspor statistik JSON
+  $('btn-export').addEventListener('click', () => {
+    const stats = loadStats();
+    if(stats.plays === 0){
+      showToast('Belum ada statistik untuk diunduh.');
+      return;
+    }
+    const payload = {
+      app: 'Nihongo by Danz-Sensei',
+      exportedAt: new Date().toISOString(),
+      stats
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'nihongo_stats.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    showToast('📥 Statistik JSON diunduh!');
+  });
+
+  // Reset semua data hub
+  $('btn-reset').addEventListener('click', () => {
+    if(!confirm('Hapus semua statistik Nihongo Hub? (Data Hall of Fame modul tidak terpengaruh)')) return;
+    try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+    renderStats({ plays: 0, lastPlayed: null });
+    showToast('🗑 Statistik dihapus.');
   });
 
   // Cegah zoom ganda di iOS
   document.addEventListener('gesturestart', e => e.preventDefault());
-
-  initBG();
-})();
+});
 </script>
+
 </body>
 </html>
